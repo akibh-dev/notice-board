@@ -1,0 +1,123 @@
+---
+import type { Notice } from '../lib/types';
+import { categoryLabels, formatDate, sourceMeta } from '../lib/data';
+import { sources } from '../sources';
+interface Props { notices: Notice[]; showSourceFilter?: boolean }
+const { notices, showSourceFilter = true } = Astro.props;
+const presentCategories = [...new Set(notices.map((n) => n.category))];
+---
+<div class="filters" id="filters">
+  <input id="q" type="search" placeholder="Search title or organization…" aria-label="Search" />
+  <div class="row">
+    {showSourceFilter && (
+      <select id="source" aria-label="Source">
+        <option value="">All sources</option>
+        {sources.map((s) => <option value={s.id}>{s.name}</option>)}
+      </select>
+    )}
+    <select id="category" aria-label="Category">
+      <option value="">All types</option>
+      {presentCategories.map((c) => <option value={c}>{categoryLabels[c]}</option>)}
+    </select>
+    <select id="sort" aria-label="Sort">
+      <option value="new">Newest first</option>
+      <option value="deadline">Deadline soonest</option>
+    </select>
+    <label class="check"><input id="open" type="checkbox" /> Hide closed</label>
+  </div>
+  <p id="count" class="muted" aria-live="polite"></p>
+</div>
+
+<ul id="list" class="list">
+  {notices.map((n) => (
+    <li
+      class="item"
+      data-text={`${n.title} ${n.organization ?? ''}`.toLowerCase()}
+      data-source={n.sourceId}
+      data-category={n.category}
+      data-published={n.publishedAt ?? ''}
+      data-deadline={n.deadline ?? ''}
+    >
+      <a class="title" href={n.url} rel="noopener noreferrer" target="_blank">{n.title}</a>
+      <div class="meta">
+        <span class={`badge cat-${n.category}`}>{categoryLabels[n.category]}</span>
+        {n.organization && <span>{n.organization}</span>}
+        {n.vacancies !== undefined && <span>{n.vacancies.toLocaleString('en')} post{n.vacancies === 1 ? '' : 's'}</span>}
+        <span class="muted">{sourceMeta(n.sourceId)?.name}</span>
+      </div>
+      <div class="dates muted">
+        {n.publishedAt && <span>Published {formatDate(n.publishedAt)}</span>}
+        {n.deadline && <span>Deadline {formatDate(n.deadline)}</span>}
+        {n.deadline && <span class="chip" data-chip></span>}
+      </div>
+    </li>
+  ))}
+</ul>
+<p id="empty" class="muted" hidden>No notices match your filters.</p>
+
+<script>
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T | null;
+  const q = $<HTMLInputElement>('q')!;
+  const source = $<HTMLSelectElement>('source');
+  const category = $<HTMLSelectElement>('category')!;
+  const sort = $<HTMLSelectElement>('sort')!;
+  const openOnly = $<HTMLInputElement>('open')!;
+  const list = $('list')!;
+  const items = [...list.querySelectorAll<HTMLElement>('.item')];
+
+  // Days left is computed in the browser: the page is static and built hours ago.
+  function daysLeft(deadline: string): number {
+    const end = Date.parse(deadline) + 86_400_000;
+    return Math.ceil((end - Date.now()) / 86_400_000) - 1;
+  }
+  for (const li of items) {
+    const dl = li.dataset.deadline;
+    const chip = li.querySelector<HTMLElement>('[data-chip]');
+    if (!dl || !chip) continue;
+    const d = daysLeft(dl);
+    li.dataset.closed = String(d < 0);
+    chip.textContent = d < 0 ? 'Closed' : d === 0 ? 'Last day' : `${d} day${d === 1 ? '' : 's'} left`;
+    chip.className = 'chip ' + (d < 0 ? 'closed' : d <= 3 ? 'soon' : 'open');
+  }
+
+  const fields = { q, category, sort, ...(source ? { source } : {}) } as Record<string, HTMLInputElement | HTMLSelectElement>;
+
+  function readUrl() {
+    const p = new URLSearchParams(location.search);
+    for (const [k, el] of Object.entries(fields)) el.value = p.get(k) ?? (k === 'sort' ? 'new' : '');
+    openOnly.checked = p.get('open') === '1';
+  }
+  function writeUrl() {
+    const p = new URLSearchParams();
+    for (const [k, el] of Object.entries(fields)) if (el.value && !(k === 'sort' && el.value === 'new')) p.set(k, el.value);
+    if (openOnly.checked) p.set('open', '1');
+    history.replaceState(null, '', p.size ? `?${p}` : location.pathname);
+  }
+
+  function apply() {
+    const v = q.value.trim().toLowerCase();
+    let shown = 0;
+    for (const li of items) {
+      const hide =
+        (v && !li.dataset.text!.includes(v)) ||
+        (source?.value && li.dataset.source !== source.value) ||
+        (category.value && li.dataset.category !== category.value) ||
+        (openOnly.checked && li.dataset.closed === 'true');
+      li.hidden = !!hide;
+      if (!hide) shown++;
+    }
+    const byDeadline = sort.value === 'deadline';
+    const key = (li: HTMLElement) => (byDeadline ? li.dataset.deadline || '9999' : li.dataset.published || '');
+    const sorted = [...items].sort((a, b) => (byDeadline ? key(a).localeCompare(key(b)) : key(b).localeCompare(key(a))));
+    // closed items sink to the bottom when sorting by deadline
+    if (byDeadline) sorted.sort((a, b) => Number(a.dataset.closed === 'true') - Number(b.dataset.closed === 'true'));
+    sorted.forEach((li) => list.appendChild(li));
+    $('count')!.textContent = `${shown} of ${items.length} notices`;
+    $('empty')!.hidden = shown > 0;
+    writeUrl();
+  }
+
+  readUrl();
+  for (const el of [q, category, sort, openOnly, ...(source ? [source] : [])]) el.addEventListener('input', apply);
+  apply();
+</script>

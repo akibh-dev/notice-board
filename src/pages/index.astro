@@ -1,0 +1,11 @@
+---
+import Base from '../layouts/Base.astro';
+import NoticeList from '../components/NoticeList.astro';
+import StatusBanner from '../components/StatusBanner.astro';
+import { dataset } from '../lib/data';
+---
+<Base>
+  <h1>Recruitment notices</h1>
+  <StatusBanner />
+  <NoticeList notices={dataset.notices} />
+</Base>

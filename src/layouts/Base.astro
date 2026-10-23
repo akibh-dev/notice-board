@@ -1,0 +1,30 @@
+---
+import '../styles/global.css';
+interface Props { title?: string; description?: string }
+const { title, description = 'Government recruitment notices from Bangladesh, in one place.' } = Astro.props;
+const fullTitle = title ? `${title} · Notice Board` : 'Notice Board — Bangladesh Govt Jobs';
+const path = Astro.url.pathname;
+const nav = [['/', 'Notices'], ['/about', 'About'], ['/feed.xml', 'RSS']];
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={new URL(path, Astro.site)} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title="Notice Board" href="/feed.xml" />
+    <title>{fullTitle}</title>
+  </head>
+  <body>
+    <header class="site">
+      <a class="brand" href="/">📌 Notice Board</a>
+      <nav>
+        {nav.map(([href, label]) => <a href={href} aria-current={path === href ? 'page' : undefined}>{label}</a>)}
+      </nav>
+    </header>
+    <main><slot /></main>
+    <footer class="site">Unofficial aggregator — every item links to the official source. Always verify details there before applying.</footer>
+  </body>
+</html>
