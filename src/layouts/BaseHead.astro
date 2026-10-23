@@ -1,0 +1,84 @@
+---
+/**
+ * Everything inside <head>, shared by the board and the 404.
+ * Fonts, anti-flash theme init and meta structure are copied from
+ * akiblog's BaseHead (the theme script must stay inline and FIRST: Astro
+ * appends its CSP <meta> after this content, so it runs before the policy).
+ * Board adaptation: WebSite JSON-LD only (no article mode).
+ */
+import { site } from '../data/site';
+
+interface Props { title?: string; description?: string; noindex?: boolean }
+const { title: pageTitle, description = site.description, noindex = false } = Astro.props;
+
+const title = pageTitle ? `${pageTitle} — ${site.name}` : `${site.name} — BD govt job circulars`;
+const origin = Astro.site ?? new URL(site.url);
+const canonical = new URL(Astro.url.pathname, origin).href;
+const personId = `${site.portfolioUrl}/#person`;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${origin.origin}/#website`,
+      url: origin.origin,
+      name: site.name,
+      description: site.description,
+      publisher: { '@id': personId },
+      inLanguage: 'en',
+    },
+  ],
+};
+---
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>{title}</title>
+<meta name="description" content={description} />
+<meta name="author" content={site.author.name} />
+{noindex ? <meta name="robots" content="noindex, follow" /> : <link rel="canonical" href={canonical} />}
+
+<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="alternate" type="application/rss+xml" title={`${site.name} — RSS`} href="/feed.xml" />
+<meta name="theme-color" content="#fcf7f7" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#1c1f23" media="(prefers-color-scheme: dark)" />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={site.name} />
+<meta property="og:title" content={pageTitle ?? title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta name="twitter:card" content="summary" />
+
+{!noindex && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+
+<script is:inline>
+  (() => {
+    const t = localStorage.getItem("theme");
+    if (t !== "light") document.documentElement.classList.add("dark");
+  })();
+</script>
+
+<link rel="preload" href="/fonts/iAWriterQuattroV.woff2" as="font" type="font/woff2" crossorigin />
+
+<style is:inline>
+  @font-face {
+    font-family: "iA Writer Quattro S";
+    src: url("/fonts/iAWriterQuattroV.woff2") format("woff2");
+    font-weight: 100 900;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "IBM Plex Serif";
+    src: url("/fonts/IBMPlexSerif-Var.woff2") format("woff2");
+    font-weight: 100 900;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Lilex";
+    src: url("/fonts/Lilex-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-display: swap;
+  }
+</style>

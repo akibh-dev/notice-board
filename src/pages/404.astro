@@ -1,0 +1,64 @@
+---
+/**
+ * Not-found page — copied from akibh.dev / blog.akibh.dev: the missing URL
+ * reported as a rustc-style diagnostic inside the brand panel. Standalone
+ * (not Layout) so it works at any broken path. Served as dist/404.html with
+ * HTTP 404 via wrangler `not_found_handling: "404-page"`.
+ * Board adaptation: the only route is "/" (the table), so the Levenshtein
+ * "did you mean" is dropped; a typo'd path always suggests `/`.
+ * NO JS REQUIRED: static HTML shows a generic path; the script personalises it.
+ */
+import '../styles/global.css';
+import BaseHead from '../layouts/BaseHead.astro';
+import { site } from '../data/site';
+
+const host = new URL(site.url).host;
+const blue = 'text-[#2c5f9e] dark:text-[#6f9fdc]';
+---
+
+<!doctype html>
+<html lang="en">
+  <head><BaseHead title="404 — not found" description="This page doesn't exist." noindex /></head>
+
+  <body class="flex min-h-dvh items-center justify-center bg-frame-background p-4 text-default antialiased">
+    <main class="w-full max-w-3xl">
+      <div aria-hidden="true" class="grid h-1.5 grid-cols-8">
+        <span class="col-span-3 bg-accent"></span>
+        <span class="col-span-2 bg-line"></span>
+        <span class="col-span-3 bg-delta-blue"></span>
+      </div>
+
+      <div class="border border-t-0 border-line bg-surface">
+        <div class="border-b border-line px-5 py-8 md:px-10 md:py-10">
+          <p class="font-mono text-2xs uppercase tracking-widest text-muted">exit status 404</p>
+          <h1 class="mt-3 font-display text-[clamp(2.25rem,4vw+1rem,3.75rem)] leading-[1.05] tracking-tight">
+            Page not found<span class="text-accent">.</span>
+          </h1>
+          <p class="mt-3 max-w-lg font-mono text-xs leading-relaxed text-subtle">The build passed, the route didn't. Here's the diagnostic:</p>
+        </div>
+
+        <pre class="overflow-x-auto bg-canvas px-5 py-6 font-mono text-xs leading-relaxed text-subtle md:px-10" aria-label="Error details"><code><span class="font-semibold text-accent">error[E0404]</span><span class="font-semibold text-default">: no route matches `<span data-path>/this-page</span>`</span>
+<span class={blue}> --&gt;</span> {host}<span data-path>/this-page</span>
+<span class={blue}>  |</span>
+<span class={blue}>1 |</span> GET <span data-path>/this-page</span>
+<span class={blue}>  |</span>     <span class="text-accent" data-carets>^^^^^^^^^^</span> <span class="text-accent">not found in this workspace</span>
+<span class={blue}>  |</span>
+<span class={blue}>  =</span> <span class="font-semibold text-default">help</span>: did you mean <a href="/" class="text-accent underline underline-offset-4">`/`</a>? (the notice table)</code></pre>
+
+        <div class="flex flex-wrap items-center gap-3 border-t border-line px-5 py-6 md:px-10">
+          <a href="/" class="btn-primary inline-flex items-center gap-2 rounded-sm px-5 py-2.5 font-mono text-2xs uppercase tracking-wider">cd ~ <span aria-hidden="true">→</span> Notices</a>
+          <a href={`mailto:${site.author.email}?subject=Broken%20link%20on%20${host}`} data-report class="ml-auto font-mono text-2xs text-muted underline-offset-4 transition-colors hover:text-accent hover:underline">Report a broken link</a>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const path = decodeURIComponent(location.pathname) || '/';
+      document.querySelectorAll('[data-path]').forEach((el) => (el.textContent = path));
+      const carets = document.querySelector('[data-carets]');
+      if (carets) carets.textContent = '^'.repeat(Math.min(path.length, 48));
+      const report = document.querySelector<HTMLAnchorElement>('[data-report]');
+      if (report) report.href += `&body=${encodeURIComponent(`Missing page: ${location.href}\nReferrer: ${document.referrer || '(direct)'}`)}`;
+    </script>
+  </body>
+</html>

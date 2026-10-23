@@ -1,0 +1,56 @@
+---
+/**
+ * Page shell. Same visual contract as akibh.dev / blog.akibh.dev:
+ * watermark body background, fixed segmented brand rail on top, one bordered
+ * bg-surface panel, mono labels. Simplified for a single-table app: no
+ * sidebar — a slim header (logo · theme) above the panel.
+ */
+import '../styles/global.css';
+import BaseHead from './BaseHead.astro';
+import BrandLogo from '../components/ui/BrandLogo.astro';
+import ThemeSwitch from '../components/islands/ThemeSwitch.astro';
+import { site } from '../data/site';
+import type { ComponentProps } from 'astro/types';
+
+type Props = ComponentProps<typeof BaseHead>;
+const head = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head><BaseHead {...head} /></head>
+  <body class="relative bg-frame-background text-default antialiased">
+    <a href="#main-content" class="btn sr-only fixed top-3 left-3 z-50 rounded-sm px-4 py-2 font-mono text-2xs uppercase tracking-wider focus:not-sr-only">Skip to content</a>
+
+    <div class="mx-auto max-w-(--site-max-width) px-(--site-inset) pt-4 md:px-0 md:pt-10">
+      {/* the same [3 brand | 2 gray | 3 blue] rail that tops the portfolio and blog, flush with the panel */}
+      <div aria-hidden="true" class="grid h-1.5 grid-cols-8">
+        <span class="col-span-3 bg-accent"></span>
+        <span class="col-span-2 bg-line"></span>
+        <span class="col-span-3 bg-delta-blue"></span>
+      </div>
+      <div class="border border-t-0 border-line bg-surface">
+        <header class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b border-line px-5 py-4 md:px-8">
+          <a href="/" class="flex items-center gap-2.5">
+            <BrandLogo class="size-8" />
+            <span class="font-mono text-sm font-medium text-default">{site.name}</span>
+          </a>
+          <ThemeSwitch />
+        </header>
+
+        <main id="main-content" tabindex="-1" class="focus-visible:outline-none"><slot /></main>
+
+        <footer class="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-line px-5 py-4 font-mono text-2xs text-muted md:px-8">
+          <p>Unofficial aggregator. Always confirm details on the official notice.</p>
+          <p class="flex gap-4">
+            <a class="hover:text-accent" href="/privacy/">Privacy</a>
+            <a class="hover:text-accent" href="/terms/">Terms</a>
+            <a class="hover:text-accent" href="/feed.xml">RSS</a>
+            <a class="hover:text-accent" href="/notices.json">JSON</a>
+          </p>
+        </footer>
+      </div>
+      <p class="py-6 text-center font-mono text-2xs text-muted">© {new Date().getFullYear()} {site.author.name}</p>
+    </div>
+  </body>
+</html>

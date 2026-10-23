@@ -6,5 +6,7 @@
   "assets": {
     "directory": "./dist",
     "not_found_handling": "404-page"
-  }
+  },
+  // zone akibh.dev is on Cloudflare, so the custom domain is created on deploy
+  "routes": [{ "pattern": "board.akibh.dev", "custom_domain": true }]
 }

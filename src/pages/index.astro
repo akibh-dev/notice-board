@@ -1,11 +1,189 @@
 ---
-import Base from '../layouts/Base.astro';
-import NoticeList from '../components/NoticeList.astro';
-import StatusBanner from '../components/StatusBanner.astro';
-import { dataset } from '../lib/data';
+/**
+ * The whole product: one table. Rows are rendered at build time (no-JS shows
+ * everything, newest first); a small script adds search, filters, sortable
+ * headers and live "days left" chips. Each row's last column links straight
+ * to the official notice, opened in a new tab.
+ *
+ * Days-left is computed in the browser: the page is static and was built
+ * hours ago, so a build-time number would be stale.
+ */
+import Layout from '../layouts/Layout.astro';
+import { categoryLabels, dataset, formatDate, sourceMeta } from '../lib/data';
+
+const notices = dataset.notices;
+const categories = [...new Set(notices.map((n) => n.category))];
+const sourceIds = [...new Set(notices.map((n) => n.sourceId))];
+const problems = dataset.sources.filter((s) => !s.ok);
+const updated = new Date(dataset.generatedAt).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Dhaka' });
+const field = 'rounded-sm border border-line bg-canvas px-3 py-2 font-mono text-xs text-default outline-none focus-visible:border-accent';
 ---
-<Base>
-  <h1>Recruitment notices</h1>
-  <StatusBanner />
-  <NoticeList notices={dataset.notices} />
-</Base>
+
+<Layout>
+  <section class="border-b border-line px-5 py-6 md:px-8">
+    <h1 class="font-display text-[clamp(1.75rem,2.5vw+1rem,2.5rem)] leading-tight tracking-tight">
+      Govt job notices<span class="text-accent">.</span>
+    </h1>
+    <p class="mt-2 font-mono text-xs text-subtle">
+      <span id="count">{notices.length} notices</span> · updated <time datetime={dataset.generatedAt}>{updated}</time> BST
+    </p>
+    {problems.map((s) => (
+      <p role="status" class="mt-1 font-mono text-2xs" style="color: var(--chip-soon)">
+        ⚠ {sourceMeta(s.id)?.name ?? s.id}: {s.stale ? 'could not refresh — showing older notices' : 'unavailable right now'}
+      </p>
+    ))}
+
+    <form id="filters" class="mt-5 flex flex-wrap items-center gap-2" role="search" onsubmit="return false">
+      <input id="q" type="search" placeholder="Search title or organization" aria-label="Search notices" class={`${field} min-w-56 flex-1`} />
+      {sourceIds.length > 1 && (
+        <select id="source" aria-label="Source" class={field}>
+          <option value="">All sources</option>
+          {sourceIds.map((id) => <option value={id}>{sourceMeta(id)?.name ?? id}</option>)}
+        </select>
+      )}
+      {categories.length > 1 && (
+        <select id="category" aria-label="Type" class={field}>
+          <option value="">All types</option>
+          {categories.map((c) => <option value={c}>{categoryLabels[c]}</option>)}
+        </select>
+      )}
+      <label class="flex items-center gap-2 font-mono text-xs text-subtle">
+        <input id="open" type="checkbox" class="accent-(--ui-accent)" /> Hide closed
+      </label>
+    </form>
+  </section>
+
+  <div class="board-wrap">
+    <table class="board" id="board">
+      <thead>
+        <tr>
+          <th scope="col" aria-sort="none"><button type="button" data-sort="title">Notice</button></th>
+          <th scope="col">Source</th>
+          <th scope="col" aria-sort="descending"><button type="button" data-sort="published">Posted</button></th>
+          <th scope="col" aria-sort="none"><button type="button" data-sort="deadline">Deadline</button></th>
+          <th scope="col" class="text-right">Link</th>
+        </tr>
+      </thead>
+      <tbody>
+        {notices.map((n) => (
+          <tr
+            data-text={`${n.title} ${n.organization ?? ''} ${n.vacancies ?? ''}`.toLowerCase()}
+            data-source={n.sourceId}
+            data-category={n.category}
+            data-title={n.title.toLowerCase()}
+            data-published={n.publishedAt ?? ''}
+            data-deadline={n.deadline ?? ''}
+          >
+            <td class="col-title">
+              <span class="t">{n.title}</span>
+              <span class="org">
+                {[n.organization, n.category !== 'job' ? categoryLabels[n.category] : null, n.vacancies !== undefined ? `${n.vacancies.toLocaleString('en')} post${n.vacancies === 1 ? '' : 's'}` : null].filter(Boolean).join(' · ')}
+              </span>
+            </td>
+            <td class="col-source" data-label="Source">{sourceMeta(n.sourceId)?.name ?? n.sourceId}</td>
+            <td class="col-date" data-label="Posted">{n.publishedAt ? formatDate(n.publishedAt) : '—'}</td>
+            <td class="col-date" data-label="Deadline">
+              {n.deadline ? formatDate(n.deadline) : '—'}<span class="chip" data-chip></span>
+            </td>
+            <td class="col-link">
+              <a href={n.url} target="_blank" rel="noopener noreferrer" class="btn inline-flex items-center gap-1.5 rounded-sm px-3 py-1.5 font-mono text-2xs uppercase tracking-wider" aria-label={`Open notice: ${n.title}`}>
+                Open <span aria-hidden="true">↗</span>
+              </a>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p id="empty" class="px-5 py-12 text-center font-mono text-xs text-muted md:px-8" hidden>
+      No notices match. <button type="button" id="reset" class="text-accent underline underline-offset-4">Clear filters</button>
+    </p>
+    {notices.length === 0 && (
+      <p class="px-5 py-12 text-center font-mono text-xs text-muted">No notices yet — check back soon.</p>
+    )}
+  </div>
+</Layout>
+
+<script>
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T | null;
+  const q = $<HTMLInputElement>('q')!;
+  const source = $<HTMLSelectElement>('source');
+  const category = $<HTMLSelectElement>('category');
+  const openOnly = $<HTMLInputElement>('open')!;
+  const body = document.querySelector<HTMLTableSectionElement>('#board tbody')!;
+  const rows = [...body.rows];
+  const heads = [...document.querySelectorAll<HTMLTableCellElement>('th[aria-sort]')];
+
+  // live deadline chips (end of the deadline day counts as open)
+  for (const tr of rows) {
+    const dl = tr.dataset.deadline;
+    const chip = tr.querySelector<HTMLElement>('[data-chip]');
+    if (!dl || !chip) continue;
+    const d = Math.ceil((Date.parse(dl) + 86_400_000 - Date.now()) / 86_400_000) - 1;
+    tr.dataset.closed = String(d < 0);
+    chip.textContent = d < 0 ? 'closed' : d === 0 ? 'today' : `${d}d left`;
+    chip.dataset.tone = d < 0 ? 'closed' : d === 0 ? 'urgent' : d <= 3 ? 'soon' : 'open';
+  }
+
+  let sortKey = 'published';
+  let dir: 'ascending' | 'descending' = 'descending';
+
+  const filters = { q, ...(source && { source }), ...(category && { category }) } as Record<string, HTMLInputElement | HTMLSelectElement>;
+
+  function render() {
+    const needle = q.value.trim().toLowerCase();
+    let shown = 0;
+    for (const tr of rows) {
+      const hide =
+        (needle && !tr.dataset.text!.includes(needle)) ||
+        (source?.value && tr.dataset.source !== source.value) ||
+        (category?.value && tr.dataset.category !== category.value) ||
+        (openOnly.checked && tr.dataset.closed === 'true');
+      tr.hidden = !!hide;
+      if (!hide) shown++;
+    }
+    const sign = dir === 'ascending' ? 1 : -1;
+    // rows without a value always sink to the bottom, whatever the direction
+    const val = (tr: HTMLElement) => tr.dataset[sortKey] ?? '';
+    rows
+      .sort((a, b) => {
+        const x = val(a), y = val(b);
+        if (!x || !y) return Number(!x) - Number(!y);
+        return x.localeCompare(y) * sign;
+      })
+      .forEach((tr) => body.appendChild(tr));
+    heads.forEach((th) => th.setAttribute('aria-sort', th.querySelector('button')?.dataset.sort === sortKey ? dir : 'none'));
+    $('count')!.textContent = shown === rows.length ? `${rows.length} notices` : `${shown} of ${rows.length} notices`;
+    $('empty')!.hidden = shown > 0 || rows.length === 0;
+    $('board')!.hidden = shown === 0 && rows.length > 0;
+
+    const p = new URLSearchParams();
+    for (const [k, el] of Object.entries(filters)) if (el.value) p.set(k, el.value);
+    if (openOnly.checked) p.set('open', '1');
+    if (sortKey !== 'published' || dir !== 'descending') p.set('sort', `${sortKey}:${dir === 'ascending' ? 'asc' : 'desc'}`);
+    history.replaceState(null, '', p.size ? `?${p}` : location.pathname);
+  }
+
+  // restore state from the URL so a filtered view can be shared
+  const params = new URLSearchParams(location.search);
+  for (const [k, el] of Object.entries(filters)) el.value = params.get(k) ?? '';
+  openOnly.checked = params.get('open') === '1';
+  const [k, d] = (params.get('sort') ?? '').split(':');
+  if (['title', 'published', 'deadline'].includes(k)) { sortKey = k; dir = d === 'asc' ? 'ascending' : 'descending'; }
+
+  document.querySelectorAll<HTMLButtonElement>('button[data-sort]').forEach((btn) =>
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.sort!;
+      // first click: title/deadline ascend (A→Z, soonest), posted descends (newest)
+      dir = key === sortKey ? (dir === 'ascending' ? 'descending' : 'ascending') : key === 'published' ? 'descending' : 'ascending';
+      sortKey = key;
+      render();
+    }),
+  );
+  for (const el of [...Object.values(filters), openOnly]) el.addEventListener('input', render);
+  $('reset')!.addEventListener('click', () => {
+    for (const el of Object.values(filters)) el.value = '';
+    openOnly.checked = false;
+    render();
+  });
+  render();
+</script>

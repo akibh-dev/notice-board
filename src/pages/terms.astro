@@ -1,0 +1,68 @@
+---
+/**
+ * Terms of use for board.akibh.dev. What this site actually is: a free,
+ * unofficial index of public government notices — no accounts, payments or
+ * user content — so the terms centre on accuracy, "not official", links,
+ * takedown/corrections and reuse of the data feed (/notices.json, /feed.xml).
+ */
+import LegalPage from '../layouts/LegalPage.astro';
+import { site } from '../data/site';
+const updated = '2026-10-23';
+---
+
+<LegalPage title="Terms of use" description="Ground rules for board.akibh.dev: unofficial listing, check the official notice, no warranty, corrections and takedowns." updated={updated}>
+  <p class="summary">
+    <strong>Short version:</strong> this is an unofficial, free listing that links to official notices. It can be late
+    or wrong, so always confirm deadlines, eligibility and how to apply on the official site. I'll fix or remove
+    anything on request.
+  </p>
+
+  <h2>About these terms</h2>
+  <p>
+    These terms cover <a href={site.url}>board.akibh.dev</a>, run by me, {site.author.name}. By using the site you
+    agree to them. How data is handled is in the <a href="/privacy/">privacy policy</a>.
+  </p>
+
+  <h2>What this site is — and isn't</h2>
+  <ul>
+    <li>It is an <strong>independent, unofficial</strong> aggregator of public recruitment notices from Bangladeshi government bodies and recruitment portals.</li>
+    <li>It is <strong>not affiliated with, endorsed by or acting for</strong> any government body, Teletalk, Bangladesh Bank or any other source named on it.</li>
+    <li>It does <strong>not accept applications, documents or payments</strong>. Anyone asking you for money to "secure" a job through this site is not me — report it to me and to the official body.</li>
+  </ul>
+
+  <h2>Accuracy and no warranty</h2>
+  <p>
+    Notices are collected automatically at build time and may be delayed, incomplete, mis-parsed or out of date.
+    Deadlines, posts and other details shown here are for convenience only. <strong>The official notice is always
+    the authoritative version</strong> — open it and verify before you act. The site is provided "as is", without
+    warranties, and may change, pause or go offline at any time.
+  </p>
+
+  <h2>Liability</h2>
+  <p>
+    As far as the law allows, I'm not liable for any loss or damage (including a missed deadline or application) from
+    using this site, its data, or the sites it links to. Nothing here limits rights the law doesn't allow to be limited.
+  </p>
+
+  <h2>Content and reuse</h2>
+  <ul>
+    <li>The notices themselves belong to their publishers. The site shows only short facts (title, organization, dates, a link) and always links to the original. It doesn't copy or host notice documents.</li>
+    <li>The site's design and code are © {site.author.name}.</li>
+    <li>Personal, non-commercial use of the table, <a href="/notices.json">/notices.json</a> and <a href="/feed.xml">/feed.xml</a> is welcome. Please don't hammer them with automated requests, and credit board.akibh.dev if you republish the list.</li>
+    <li>Names and logos belong to their owners and are used only to identify them.</li>
+  </ul>
+
+  <h2>Acceptable use</h2>
+  <p>Don't attack, overload or scrape the site abusively, and don't use it to mislead people (for example by presenting it as an official portal).</p>
+
+  <h2>Links to other sites</h2>
+  <p>Each "Open" link leads to a site I don't control. I'm not responsible for its content, availability or policies.</p>
+
+  <h2>Corrections, takedowns and contact</h2>
+  <p>
+    Spotted a wrong date, a broken link or a notice that shouldn't be listed? Email{' '}
+    <a href={`mailto:${site.author.email}`}>{site.author.email}</a> with the page or row and I'll fix or remove it
+    promptly. I may update these terms; the date above shows the latest version, always at{' '}
+    <a href="/terms/">board.akibh.dev/terms/</a>.
+  </p>
+</LegalPage>

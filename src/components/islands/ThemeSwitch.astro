@@ -1,0 +1,125 @@
+---
+/**
+ * @file islands/ThemeSwitch.astro
+ * @description Segmented Light / Dark theme control — dark is the default.
+ *              PURE ASTRO port of ThemeSwitch.tsx (Base UI ToggleGroup),
+ *              plan 17 §3 Phase 5. Same markup, classes and behaviour.
+ *
+ * BEHAVIOUR KEPT 1:1 FROM BASE UI (WAI-ARIA toolbar/toggle-group pattern):
+ * - role="group" + aria-label, each option a <button aria-pressed>.
+ * - ONE tab stop (roving tabindex); ArrowLeft/ArrowRight move focus and
+ *   loop at the ends (Base UI `loopFocus`), Home/End jump to first/last.
+ *   Arrows only MOVE focus; Enter/Space (native button click) selects.
+ * - Exactly one option stays pressed: clicking the pressed one is a
+ *   no-op (the React version blocked "unselect all" the same way).
+ * - Nothing is pressed in the server HTML (SSR can't read localStorage,
+ *   so a hardcoded state would flash the WRONG option). The anti-flash
+ *   script has already set <html class>, and the element syncs as soon as
+ *   its module runs — earlier than the React island, which waited for
+ *   hydration — so at worst a brief neutral state, never a wrong one.
+ *
+ * NEW (the React version couldn't): every switch on the page (sidebar +
+ * mobile menu) and the terminal's `theme` command stay in sync. The
+ * pressed state is derived from <html class="dark"> via one
+ * MutationObserver, so whoever calls applyTheme(), every switch follows.
+ *
+ * WHY A CUSTOM ELEMENT: state + listeners are scoped per instance and
+ * set up in connectedCallback; the class is defined once per page no
+ * matter how many switches render. Logic stays in lib/theme.ts (shared
+ * with the terminal).
+ *
+ * POC:  <ThemeSwitch />
+ */
+import { THEME_MODES } from "../../lib/theme";
+---
+
+<theme-switch class="block">
+  <div
+    role="group"
+    aria-label="Color theme"
+    data-orientation="horizontal"
+    class="grid grid-cols-2 gap-0.5 rounded-md border border-line-subtle bg-surface p-0.5"
+  >
+    {
+      THEME_MODES.map((m, i) => (
+        <button
+          type="button"
+          data-mode={m}
+          aria-pressed="false"
+          tabindex={i === 0 ? 0 : -1}
+          class="rounded-sm px-2 py-1.5 font-mono text-2xs text-muted capitalize transition-colors outline-none hover:text-default focus-visible:ring-1 focus-visible:ring-accent aria-pressed:bg-canvas aria-pressed:text-accent aria-pressed:shadow-2xs"
+        >
+          {m}
+        </button>
+      ))
+    }
+  </div>
+</theme-switch>
+
+<script>
+  import { applyTheme, isThemeMode, type ThemeMode } from "../../lib/theme";
+
+  /** current theme as rendered — <html class="dark"> is the source of truth */
+  const currentMode = (): ThemeMode => (document.documentElement.classList.contains("dark") ? "dark" : "light");
+
+  class ThemeSwitch extends HTMLElement {
+    private buttons: HTMLButtonElement[] = [];
+    private observer?: MutationObserver;
+
+    connectedCallback() {
+      this.buttons = [...this.querySelectorAll<HTMLButtonElement>("button[data-mode]")];
+      this.sync();
+
+      this.addEventListener("click", this.onClick);
+      this.addEventListener("keydown", this.onKeydown);
+
+      // follow theme changes from anywhere (other switch, terminal command)
+      this.observer = new MutationObserver(() => this.sync());
+      this.observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    }
+
+    disconnectedCallback() {
+      this.removeEventListener("click", this.onClick);
+      this.removeEventListener("keydown", this.onKeydown);
+      this.observer?.disconnect();
+    }
+
+    /** pressed state + roving tab stop follow the active theme */
+    private sync() {
+      const mode = currentMode();
+      const focused = this.buttons.find((b) => b === document.activeElement);
+      for (const b of this.buttons) {
+        const on = b.dataset.mode === mode;
+        b.setAttribute("aria-pressed", String(on));
+        // tab stop: the button the user is on (just clicked / arrowed to),
+        // otherwise the pressed one — Base UI's "highlighted item" rule
+        b.tabIndex = (focused ? b === focused : on) ? 0 : -1;
+      }
+    }
+
+    private onClick = (e: Event) => {
+      const btn = (e.target as Element).closest<HTMLButtonElement>("button[data-mode]");
+      const mode = btn?.dataset.mode ?? "";
+      if (!btn || !isThemeMode(mode) || mode === currentMode()) return; // no unselect
+      applyTheme(mode); // observer re-syncs every switch
+    };
+
+    private onKeydown = (e: KeyboardEvent) => {
+      const i = this.buttons.indexOf(e.target as HTMLButtonElement);
+      if (i < 0) return;
+      const last = this.buttons.length - 1;
+      const next =
+        e.key === "ArrowRight" ? (i === last ? 0 : i + 1)
+        : e.key === "ArrowLeft" ? (i === 0 ? last : i - 1)
+        : e.key === "Home" ? 0
+        : e.key === "End" ? last
+        : -1;
+      if (next < 0) return;
+      e.preventDefault();
+      this.buttons.forEach((b, j) => (b.tabIndex = j === next ? 0 : -1));
+      this.buttons[next].focus();
+    };
+  }
+
+  customElements.define("theme-switch", ThemeSwitch);
+</script>

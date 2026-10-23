@@ -1,0 +1,90 @@
+---
+/**
+ * Privacy policy for board.akibh.dev. Every statement was checked against
+ * this repo, not copied from a template:
+ *   no forms/accounts/comments            → src/pages (index, 404, legal only)
+ *   `theme` in localStorage               → src/lib/theme.ts
+ *   filters/sort in the URL               → script in pages/index.astro (history.replaceState, never sent)
+ *   fonts self-hosted                     → public/fonts
+ *   outbound links to official portals    → rows in pages/index.astro
+ *   hosting + analytics                   → Cloudflare Workers static assets (+ optional zone-level Web Analytics, allowed in the CSP)
+ * If any of that changes (a form, new analytics, accounts…), update this page and `updated` in the same commit.
+ */
+import LegalPage from '../layouts/LegalPage.astro';
+import { site } from '../data/site';
+const updated = '2026-10-23';
+---
+
+<LegalPage title="Privacy policy" description="What data board.akibh.dev collects (almost none), who processes it, and how to reach me." updated={updated}>
+  <p class="summary">
+    <strong>Short version:</strong> there are no accounts, forms, ads or tracking cookies, and I don't sell or share
+    data. The site remembers your light/dark choice on your device, and Cloudflare hosts it and counts visits
+    without cookies.
+  </p>
+
+  <h2>Who runs this</h2>
+  <p>
+    {site.name} (<a href={site.url}>board.akibh.dev</a>) is run by me, {site.author.name}, an individual. For anything
+    about your data, email <a href={`mailto:${site.author.email}`}>{site.author.email}</a>.
+  </p>
+
+  <h2>What the site collects</h2>
+  <p>
+    Nothing from you directly. There is no sign-up, search log, form or comment box. The page is static: the list of
+    notices was prepared when the site was last built, and your searches, filters and sorting happen entirely in
+    your browser.
+  </p>
+  <ul>
+    <li>
+      <strong>Filters in the address bar.</strong> When you search, filter or sort, the choices are written into the
+      page's URL (for example <code>?q=engineer&amp;open=1</code>) so you can bookmark or share a view. They stay in
+      your browser and the link; they are not sent to me or stored.
+    </li>
+    <li>
+      <strong>Theme choice.</strong> Your light/dark setting is saved in your browser's local storage (key{' '}
+      <code>theme</code>). It never leaves your device.
+    </li>
+    <li><strong>Fonts</strong> are hosted on this site itself, so no font service sees your visit.</li>
+  </ul>
+
+  <h2>Hosting, security and analytics</h2>
+  <p>
+    The site is served by <a href="https://www.cloudflare.com/">Cloudflare</a>. Like any web host, Cloudflare
+    processes your IP address and basic request details (browser, page, time) to deliver pages and block attacks, and
+    its bot protection may set a strictly necessary security cookie such as <code>__cf_bm</code>. I may also use{' '}
+    <a href="https://www.cloudflare.com/web-analytics/">Cloudflare Web Analytics</a> to see totals such as page views,
+    countries and browsers; it uses no cookies or local storage and I can't tell who you are. Details:{' '}
+    <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare privacy policy</a>.
+  </p>
+
+  <h2>Cookies</h2>
+  <p>I set no cookies. The only possible cookie is Cloudflare's security cookie above. Because nothing here tracks you, there is no cookie banner.</p>
+
+  <h2>Where the notices come from</h2>
+  <p>
+    The notices are public recruitment circulars published by government bodies and their recruitment portals. They
+    contain organization names, job titles and dates, not personal data about applicants. When I build the site, a
+    script fetches those public pages; no visitor data is involved.
+  </p>
+
+  <h2>Links to official sites</h2>
+  <p>
+    Each row's "Open" button takes you to the official notice on another website, in a new tab. That site has its own
+    privacy policy and may use its own cookies or tracking. This policy stops at board.akibh.dev. I never ask for or
+    handle your application, documents or fees — apply only on the official portal.
+  </p>
+
+  <h2>Your choices and rights</h2>
+  <p>
+    I hold no personal data about visitors, so there is usually nothing to access or delete. If you believe I do, or
+    you have a question, email <a href={`mailto:${site.author.email}`}>{site.author.email}</a> and I'll reply within 30
+    days. Depending on where you live you may also have rights under laws like the GDPR, including complaining to your
+    data-protection authority.
+  </p>
+
+  <h2>Children</h2>
+  <p>The site isn't aimed at children under 13 and doesn't knowingly collect their data.</p>
+
+  <h2>Changes</h2>
+  <p>If what the site collects changes, this page changes with it and the date above is updated. The current version always lives at <a href="/privacy/">board.akibh.dev/privacy/</a>.</p>
+</LegalPage>

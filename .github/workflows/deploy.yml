@@ -1,11 +1,9 @@
 name: Deploy
 
+# Manual only: Actions → Deploy → "Run workflow".
+# Deliberately no push/schedule trigger so every deploy is a conscious action.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
-  schedule:
-    - cron: '0 */6 * * *' # re-fetch sources; remove if you only want push + manual
 
 concurrency:
   group: deploy
@@ -16,12 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      SITE_URL: ${{ vars.SITE_URL }}
+      SITE_URL: https://board.akibh.dev
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version-file: .node-version
           cache: npm
       - run: npm ci
       - run: npm test
