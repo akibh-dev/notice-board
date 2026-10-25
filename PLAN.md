@@ -11,11 +11,11 @@ sources (src/sources/*.ts)  →  scripts/fetch.ts  →  data/notices.json  →  
 - **Failure isolation:** if a source fails, its notices from the *previous deploy* (downloaded from `$SITE_URL/notices.json`) are reused and flagged stale on the page. Build only fails if zero notices total.
 - **Output:** one page `/` (a single table: Notice · Source · Posted · Deadline · Link → official URL), `404.html`, plus `/notices.json` (also the fallback cache) and `/feed.xml`. Search, source/type filters, hide-closed, sortable headers and live "days left" chips are vanilla TS (state kept in the URL). No framework.
 - **Design:** tokens, fonts, watermark, segmented rail, theme switch and the rustc-style 404 are copied from `../akiblog/apps/blog` (global.css §1–7) so it matches akibh.dev / blog.akibh.dev. Board-only styles are §8 of `src/styles/global.css`.
-- **Hosting:** Cloudflare Workers Static Assets (`wrangler.jsonc` → `./dist`). No server code.
+- **Hosting:** Cloudflare Pages — static `dist/` uploaded by `wrangler pages deploy`. No server code.
 
 ## Deploy
-`.github/workflows/deploy.yml`: **`workflow_dispatch` only** (Actions → Deploy → Run workflow). No push or schedule trigger.
-Secrets: `CLOUDFLARE_API_TOKEN` (Workers edit + zone DNS/Workers routes for akibh.dev), `CLOUDFLARE_ACCOUNT_ID`. `wrangler.jsonc` attaches the `board.akibh.dev` custom domain on deploy.
+`.github/workflows/deploy.yml`: push to `main` or manual (Actions → Deploy → Run workflow). Builds in CI with bun (test → fetch → build), then `wrangler pages deploy dist --branch=main`; the Pages project `notice-board` is auto-created on first run.
+Secrets: `CLOUDFLARE_API_TOKEN` (Cloudflare Pages: Edit), `CLOUDFLARE_ACCOUNT_ID`. Custom domain `board.akibh.dev` is attached once in the dashboard (Pages → notice-board → Custom domains); zone is on the same account so SSL is automatic.
 
 ## Open risks (verified while scaffolding)
 1. ~~**Teletalk Alljobs is a React SPA**~~ **SOLVED:** JSON endpoint found via DevTools → Network: `GET /api/v1/published-jobs/search?searchKeyword=&page=N&limit=50`. Implemented in `scripts/teletalk.ts` (paginates until an empty page, drops expired deadlines); `src/sources/teletalk-alljobs.ts` is a thin adapter over it. Run standalone: `bunx tsx scripts/teletalk.ts` → `data/teletalk.json`.

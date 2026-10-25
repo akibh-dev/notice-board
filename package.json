@@ -15,7 +15,7 @@
     "preview": "astro preview",
     "check": "astro check",
     "test": "vitest run",
-    "deploy": "npm run build:full && wrangler deploy"
+    "deploy": "npm run build:full && wrangler pages deploy dist --project-name=notice-board --branch=main"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",

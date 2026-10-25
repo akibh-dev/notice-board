@@ -1,9 +1,9 @@
 # ==============================================================================
-# Notice Board → Cloudflare deployment  (modeled on akiblog's portfolio-deploy.yml)
+# Notice Board → Cloudflare Pages deployment
+# (mirrors akiblog/.github/workflows/portfolio-deploy.yml)
 #
-# - Trigger: manual only (Actions → Deploy → "Run workflow"). Deliberately no
-#   push/schedule trigger so every deploy is a conscious action. To deploy on
-#   every push, add:  push: { branches: [main] }
+# - Trigger: every push to `main`, or a manual run from the Actions tab
+#   (workflow_dispatch).
 # - Builds IN CI from source with bun, so the deployed site always matches the
 #   pushed commit.
 # - `bun run fetch` runs scripts/fetch.ts, which pulls every registered source
@@ -11,19 +11,25 @@
 #   drops expired jobs). A failing source keeps its previous deploy's notices
 #   (downloaded from $SITE_URL/notices.json) and is flagged stale; the build
 #   only fails if zero notices exist.
-# - Deploys with `wrangler deploy` (Workers Static Assets per wrangler.jsonc —
-#   NOT `wrangler pages deploy`, the board.akibh.dev custom domain is attached
-#   from wrangler.jsonc routes on deploy).
-# - `concurrency` stops two runs from racing; the newer deploy wins.
+# - Deploys with `wrangler pages deploy` from the repo root, uploading the
+#   static dist/. `--branch=main` makes it a PRODUCTION deployment.
+# - First run: if the Pages project doesn't exist yet, it is created with
+#   production branch `main`. After that the step is a no-op.
+# - Custom domain: attach `board.akibh.dev` once in the dashboard
+#   (Pages → notice-board → Custom domains). The zone is on the same account,
+#   so SSL/routing is automatic after that.
+# - `concurrency` stops two pushes from racing; the newer deploy wins.
 #
 # Required GitHub repository secrets:
-#   CLOUDFLARE_API_TOKEN   token with Workers edit + zone access for akibh.dev
-#   CLOUDFLARE_ACCOUNT_ID  the account that owns the worker and the zone
+#   CLOUDFLARE_API_TOKEN   token with "Cloudflare Pages: Edit" permission
+#   CLOUDFLARE_ACCOUNT_ID  the account that owns the Pages project
 # ==============================================================================
 
 name: Deploy
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -42,6 +48,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       SITE_URL: https://board.akibh.dev
+      PROJECT_NAME: notice-board
 
     steps:
       - name: Checkout
@@ -64,5 +71,18 @@ jobs:
       - name: Build site
         run: bun run build
 
-      - name: Deploy to Cloudflare
-        run: bunx wrangler deploy
+      - name: Ensure Pages project exists
+        run: |
+          if bunx wrangler pages project list | grep -qw "$PROJECT_NAME"; then
+            echo "Pages project '$PROJECT_NAME' exists"
+          else
+            bunx wrangler pages project create "$PROJECT_NAME" --production-branch=main
+          fi
+
+      - name: Deploy to Cloudflare Pages
+        run: |
+          bunx wrangler pages deploy dist \
+            --project-name="$PROJECT_NAME" \
+            --branch=main \
+            --commit-hash="${{ github.sha }}" \
+            --commit-message="$(git log -1 --pretty=%s | head -c 200)"
