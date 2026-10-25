@@ -1,7 +1,28 @@
+# ==============================================================================
+# Notice Board → Cloudflare deployment  (modeled on akiblog's portfolio-deploy.yml)
+#
+# - Trigger: manual only (Actions → Deploy → "Run workflow"). Deliberately no
+#   push/schedule trigger so every deploy is a conscious action. To deploy on
+#   every push, add:  push: { branches: [main] }
+# - Builds IN CI from source with bun, so the deployed site always matches the
+#   pushed commit.
+# - `bun run fetch` runs scripts/fetch.ts, which pulls every registered source
+#   (scripts/teletalk.ts for Teletalk Alljobs — paginates until an empty page,
+#   drops expired jobs). A failing source keeps its previous deploy's notices
+#   (downloaded from $SITE_URL/notices.json) and is flagged stale; the build
+#   only fails if zero notices exist.
+# - Deploys with `wrangler deploy` (Workers Static Assets per wrangler.jsonc —
+#   NOT `wrangler pages deploy`, the board.akibh.dev custom domain is attached
+#   from wrangler.jsonc routes on deploy).
+# - `concurrency` stops two runs from racing; the newer deploy wins.
+#
+# Required GitHub repository secrets:
+#   CLOUDFLARE_API_TOKEN   token with Workers edit + zone access for akibh.dev
+#   CLOUDFLARE_ACCOUNT_ID  the account that owns the worker and the zone
+# ==============================================================================
+
 name: Deploy
 
-# Manual only: Actions → Deploy → "Run workflow".
-# Deliberately no push/schedule trigger so every deploy is a conscious action.
 on:
   workflow_dispatch:
 
@@ -9,24 +30,39 @@ concurrency:
   group: deploy
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
+    name: Build & deploy notice-board
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       SITE_URL: https://board.akibh.dev
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version-file: .node-version
-          cache: npm
-      - run: npm ci
-      - run: npm test
-      - run: npm run fetch
-      - run: npm run build
-      - uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy
+          bun-version: 1.3.14
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Test
+        run: bun run test
+
+      - name: Fetch notices (Teletalk Alljobs + other sources)
+        run: bun run fetch
+
+      - name: Build site
+        run: bun run build
+
+      - name: Deploy to Cloudflare
+        run: bunx wrangler deploy

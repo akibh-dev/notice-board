@@ -18,7 +18,7 @@ sources (src/sources/*.ts)  →  scripts/fetch.ts  →  data/notices.json  →  
 Secrets: `CLOUDFLARE_API_TOKEN` (Workers edit + zone DNS/Workers routes for akibh.dev), `CLOUDFLARE_ACCOUNT_ID`. `wrangler.jsonc` attaches the `board.akibh.dev` custom domain on deploy.
 
 ## Open risks (verified while scaffolding)
-1. **Teletalk Alljobs is a React SPA** — no HTML to scrape. Need to find its JSON endpoint via DevTools (Network tab on `/jobs/government`). Stub in `teletalk-alljobs.ts`.
+1. ~~**Teletalk Alljobs is a React SPA**~~ **SOLVED:** JSON endpoint found via DevTools → Network: `GET /api/v1/published-jobs/search?searchKeyword=&page=N&limit=50`. Implemented in `scripts/teletalk.ts` (paginates until an empty page, drops expired deadlines); `src/sources/teletalk-alljobs.ts` is a thin adapter over it. Run standalone: `bunx tsx scripts/teletalk.ts` → `data/teletalk.json`.
 2. **erecruitment.bb.org.bd returned 403 / "maintenance"** from my network. Check it works from GitHub runners; if geo-blocked, options: self-hosted runner, a Cloudflare Worker proxy, or a scheduled local fetch that commits data.
 3. Respect each site's ToS/robots; always link to the original and never rehost PDFs.
 
