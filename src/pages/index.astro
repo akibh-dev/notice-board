@@ -58,7 +58,6 @@ const field = 'rounded-sm border border-line bg-canvas px-3 py-2 font-mono text-
       <thead>
         <tr>
           <th scope="col" aria-sort="none"><button type="button" data-sort="title">Notice</button></th>
-          <th scope="col">Source</th>
           <th scope="col" aria-sort="descending"><button type="button" data-sort="published">Posted</button></th>
           <th scope="col" aria-sort="none"><button type="button" data-sort="deadline">Deadline</button></th>
           <th scope="col" class="text-right">Link</th>
@@ -77,10 +76,9 @@ const field = 'rounded-sm border border-line bg-canvas px-3 py-2 font-mono text-
             <td class="col-title">
               <span class="t">{n.title}</span>
               <span class="org">
-                {[n.organization, n.category !== 'job' ? categoryLabels[n.category] : null, n.vacancies !== undefined ? `${n.vacancies.toLocaleString('en')} post${n.vacancies === 1 ? '' : 's'}` : null].filter(Boolean).join(' · ')}
+                {[n.positions !== undefined ? `${n.positions} job${n.positions === 1 ? '' : 's'}` : null, n.vacancies !== undefined ? `${n.vacancies.toLocaleString('en')} post${n.vacancies === 1 ? '' : 's'}` : null, n.category !== 'job' ? categoryLabels[n.category] : null].filter(Boolean).join(' · ')}
               </span>
             </td>
-            <td class="col-source" data-label="Source">{sourceMeta(n.sourceId)?.name ?? n.sourceId}</td>
             <td class="col-date" data-label="Posted">{n.publishedAt ? formatDate(n.publishedAt) : '—'}</td>
             <td class="col-date" data-label="Deadline">
               {n.deadline ? formatDate(n.deadline) : '—'}<span class="chip" data-chip></span>

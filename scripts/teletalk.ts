@@ -30,6 +30,7 @@ const MAX_PAGES = 100; // safety net; the loop normally ends on the first empty 
 interface TeletalkJob {
   job_primary_id: number;
   job_title: string;
+  organization_id?: number | string;
   org_name?: string;
   application_site_url?: string;
   published_date?: string; // ISO datetime
@@ -58,8 +59,36 @@ async function defaultGet(url: string, init?: RequestInit): Promise<Response> {
 }
 
 /**
- * Fetch every page until one returns empty, drop expired jobs, return
- * board-ready notices. `get` is injectable so src/sources can hand in the
+ * One circular (notice) from an organisation lists many positions, but the API
+ * returns one entry per position. Group them back into one notice per
+ * organisation: title = provider name, positions = x jobs, vacancies = y posts,
+ * dates = earliest of each (soonest deadline drives the "time left" chip).
+ */
+function groupByOrganization(jobs: TeletalkJob[]): Omit<Notice, 'id' | 'sourceId'>[] {
+  const byOrg = new Map<string, TeletalkJob[]>();
+  for (const j of jobs) {
+    const key = String(j.organization_id ?? j.org_name ?? 'unknown');
+    const list = byOrg.get(key) ?? [];
+    list.push(j);
+    byOrg.set(key, list);
+  }
+  const earliest = (list: TeletalkJob[], k: 'published_date' | 'deadline_date') =>
+    list.map((j) => j[k]).filter(Boolean).sort()[0]?.slice(0, 10);
+  return [...byOrg.values()].map((list) => ({
+    title: list[0].org_name ?? 'Unknown organisation',
+    organization: list[0].org_name,
+    url: list[0].application_site_url ?? 'https://alljobs.teletalk.com.bd/jobs/government',
+    publishedAt: earliest(list, 'published_date'),
+    deadline: earliest(list, 'deadline_date'),
+    vacancies: list.reduce((n, j) => n + (Number(j.vacancy) || 0), 0) || undefined,
+    positions: list.length,
+    category: 'job' as const,
+  }));
+}
+
+/**
+ * Fetch every page until one returns empty, drop expired jobs, return one
+ * notice per organisation. `get` is injectable so src/sources can hand in the
  * shared retrying fetch context.
  */
 export async function fetchTeletalkJobs(get: Get = defaultGet): Promise<Omit<Notice, 'id' | 'sourceId'>[]> {
@@ -81,17 +110,12 @@ export async function fetchTeletalkJobs(get: Get = defaultGet): Promise<Omit<Not
   // Keep only jobs whose application deadline has not expired.
   // (NaN from a missing/bad date fails the >= check, so those are dropped too.)
   const live = all.filter((j) => Date.parse(j.deadline_date ?? '') >= now);
-  console.log(`[teletalk] ${all.length} fetched, ${all.length - live.length} expired dropped, ${live.length} live`);
-
-  return live.map((j) => ({
-    title: j.job_title,
-    organization: j.org_name,
-    url: j.application_site_url ?? 'https://alljobs.teletalk.com.bd/jobs/government',
-    publishedAt: j.published_date?.slice(0, 10),
-    deadline: j.deadline_date?.slice(0, 10),
-    vacancies: Number(j.vacancy) || undefined,
-    category: 'job' as const,
-  }));
+  const notices = groupByOrganization(live);
+  console.log(
+    `[teletalk] ${all.length} positions fetched, ${all.length - live.length} expired dropped, ` +
+      `${live.length} live positions → ${notices.length} notices`,
+  );
+  return notices;
 }
 
 /* ---------- standalone runner: `bunx tsx scripts/teletalk.ts` ---------- */

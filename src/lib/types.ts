@@ -13,7 +13,10 @@ export interface Notice {
   publishedAt?: string;
   /** Application deadline, ISO date */
   deadline?: string;
+  /** Total posts/vacancies across the whole notice */
   vacancies?: number;
+  /** Distinct job positions in the notice (when the source lists per-position) */
+  positions?: number;
   category: Category;
 }
 
