@@ -19,11 +19,11 @@ Secrets: `CLOUDFLARE_API_TOKEN` (Cloudflare Pages: Edit), `CLOUDFLARE_ACCOUNT_ID
 
 ## Open risks (verified while scaffolding)
 1. ~~**Teletalk Alljobs is a React SPA**~~ **SOLVED:** JSON endpoint found via DevTools → Network: `GET /api/v1/published-jobs/search?searchKeyword=&page=N&limit=50`. Implemented in `scripts/teletalk.ts` (paginates until an empty page, drops expired deadlines); `src/sources/teletalk-alljobs.ts` is a thin adapter over it. Run standalone: `bunx tsx scripts/teletalk.ts` → `data/teletalk.json`.
-2. **erecruitment.bb.org.bd returned 403 / "maintenance"** from my network. Check it works from GitHub runners; if geo-blocked, options: self-hosted runner, a Cloudflare Worker proxy, or a scheduled local fetch that commits data.
+2. **Bangladesh Bank page access needs deploy validation.** The supplied page screenshot confirms the table headers; `scripts/bb-erecruitment.ts` maps Circular Title, Circular For, Publish Date, and Close Date by header, with positional fallbacks. This environment cannot load the pages directly, so confirm the refreshed notices from a network that can reach the host.
 3. Respect each site's ToS/robots; always link to the original and never rehost PDFs.
 
 ## Roadmap
-1. Implement the two sources (endpoint discovery) — add a recorded-response test per source in `src/sources/__fixtures__`.
+1. Record live responses for the two sources and add fixture coverage for their parsers.
 2. Add sources: other bank/commission/BPSC/DPE circulars, one file each.
 3. UI: category + source filters, "closing soon", Bangla labels, dark mode (already via `color-scheme`).
 4. Dedupe notices across sources; archive expired items after N days.
