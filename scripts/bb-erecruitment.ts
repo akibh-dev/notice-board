@@ -3,11 +3,11 @@
  * rendered, so there is no client-side API to call: the useful notice data is
  * in the HTML tables/lists and links returned by the pages.
  *
- * Used by src/sources/bb-erecruitment.ts in the normal fetch pipeline. Run
- * `bunx tsx scripts/bb-erecruitment.ts` to write data/bb-erecruitment.json.
+ * Run `npm run fetch:bb` locally before committing. The shared refresh script
+ * writes data/sources/bb-erecruitment.json; deployment uses that saved file.
  */
 import * as cheerio from 'cheerio';
-import type { Category, Notice, SourceSnapshot } from '../src/lib/types';
+import type { Category, Notice } from '../src/lib/types';
 
 export const BB_PAGES = [
   {
@@ -95,7 +95,7 @@ function parsePage(html: string, page: (typeof BB_PAGES)[number]): Omit<Notice, 
   const $ = cheerio.load(html);
   const pageTitle = $('title').first().text().trim();
   if (/request rejected|access denied|forbidden/i.test(pageTitle)) {
-    throw new BangladeshBankBlockedError(`Bangladesh Bank blocked the request from this network (${pageTitle}); refresh its snapshot from a network that can reach the site`);
+    throw new BangladeshBankBlockedError(`Bangladesh Bank blocked the request from this network (${pageTitle}); run npm run fetch:bb from a network that can reach the site`);
   }
   const found = new Map<string, Omit<Notice, 'id' | 'sourceId'>>();
   let matchingTables = 0;
@@ -201,49 +201,8 @@ export async function fetchBangladeshBankJobs(get: Get): Promise<Omit<Notice, 'i
     throw new Error(errors.join('; '));
   }
   if (unique.size === 0) throw new Error('no Bangladesh Bank notices found');
+  if ([...unique.values()].some((notice) => !notice.publishedAt || !notice.deadline)) {
+    throw new Error('Bangladesh Bank notices are missing publish dates or close dates; saved data will not be replaced');
+  }
   return [...unique.values()];
-}
-
-async function defaultGet(url: string, init?: RequestInit): Promise<Response> {
-  for (let attempt = 1; ; attempt++) {
-    try {
-      const response = await fetch(url, {
-        ...init,
-        signal: AbortSignal.timeout(20_000),
-        headers: {
-          'user-agent': 'Mozilla/5.0 (compatible; notice-board/0.1; +https://board.akibh.dev)',
-          ...init?.headers,
-        },
-      });
-      if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
-      return response;
-    } catch (error) {
-      if (attempt >= 3) throw error;
-      await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
-    }
-  }
-}
-
-const invokedDirectly = /bb-erecruitment\.ts$/.test(process.argv[1] ?? '');
-if (invokedDirectly) {
-  const notices = await fetchBangladeshBankJobs(defaultGet);
-  const { mkdir, writeFile, rename } = await import('node:fs/promises');
-  await mkdir('data', { recursive: true });
-  await writeFile('data/bb-erecruitment.json', JSON.stringify({
-    generatedAt: new Date().toISOString(),
-    count: notices.length,
-    notices,
-  }, null, 2));
-  console.log(`wrote data/bb-erecruitment.json (${notices.length} notices)`);
-  if (process.argv.includes('--snapshot')) {
-    if (notices.some((notice) => !notice.publishedAt || !notice.deadline)) {
-      throw new Error('Refusing to replace snapshot: notices are missing publish dates or close dates');
-    }
-    const snapshot: SourceSnapshot = { fetchedAt: new Date().toISOString(), notices };
-    const file = 'src/sources/snapshots/bb-erecruitment.json';
-    await mkdir('src/sources/snapshots', { recursive: true });
-    await writeFile(`${file}.tmp`, JSON.stringify(snapshot, null, 2) + '\n');
-    await rename(`${file}.tmp`, file);
-    console.log(`updated ${file} (${notices.length} notices)`);
-  }
 }

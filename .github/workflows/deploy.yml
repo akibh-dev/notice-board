@@ -6,11 +6,9 @@
 #   (workflow_dispatch).
 # - Builds IN CI from source with bun, so the deployed site always matches the
 #   pushed commit.
-# - `bun run fetch` runs scripts/fetch.ts, which pulls every registered source
-#   (scripts/teletalk.ts for Teletalk Alljobs — paginates until an empty page,
-#   drops expired jobs). A failing source keeps its previous deploy's notices
-#   (downloaded from $SITE_URL/notices.json) and is flagged stale; the build
-#   only fails if zero notices exist.
+# - Source data is refreshed locally before committing. `bun run build`
+#   validates data/sources/*.json, assembles data/notices.json, and builds Astro.
+#   Deployment makes no requests to recruitment sites or the previous deploy.
 # - Deploys with `wrangler pages deploy` from the repo root, uploading the
 #   static dist/. `--branch=main` makes it a PRODUCTION deployment.
 # - First run: if the Pages project doesn't exist yet, it is created with
@@ -65,10 +63,7 @@ jobs:
       - name: Test
         run: bun run test
 
-      - name: Fetch notices (Teletalk Alljobs + other sources)
-        run: bun run fetch
-
-      - name: Build site
+      - name: Build site from committed data
         run: bun run build
 
       - name: Ensure Pages project exists

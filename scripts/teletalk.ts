@@ -8,12 +8,8 @@
  * signal. Every job whose application deadline has already passed is dropped,
  * the rest are returned as board-ready notices.
  *
- * Used two ways:
- *   1. Deploy pipeline — src/sources/teletalk-alljobs.ts adapts this file into
- *      the Source interface, so `bun run fetch` (in the GitHub Action) merges
- *      these jobs into data/notices.json with failure isolation.
- *   2. Standalone — `bunx tsx scripts/teletalk.ts` writes data/teletalk.json
- *      so you can inspect exactly what this source produced.
+ * Run `npm run fetch:teletalk` locally to update
+ * data/sources/teletalk-alljobs.json. Deployments assemble the saved files.
  *
  * Adding another source later: copy this file under a new name
  * (scripts/<source>.ts), swap the endpoint + mapping, register an adapter in
@@ -116,17 +112,4 @@ export async function fetchTeletalkJobs(get: Get = defaultGet): Promise<Omit<Not
       `${live.length} live positions → ${notices.length} notices`,
   );
   return notices;
-}
-
-/* ---------- standalone runner: `bunx tsx scripts/teletalk.ts` ---------- */
-const invokedDirectly = typeof process !== 'undefined' && /teletalk\.ts$/.test(process.argv[1] ?? '');
-if (invokedDirectly) {
-  const jobs = await fetchTeletalkJobs();
-  const { mkdir, writeFile } = await import('node:fs/promises');
-  await mkdir('data', { recursive: true });
-  await writeFile(
-    'data/teletalk.json',
-    JSON.stringify({ generatedAt: new Date().toISOString(), count: jobs.length, jobs }, null, 2),
-  );
-  console.log(`wrote data/teletalk.json (${jobs.length} live jobs)`);
 }

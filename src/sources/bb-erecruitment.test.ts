@@ -28,10 +28,17 @@ test('recognizes the HTTP 200 Request Rejected response captured on GitHub', asy
     .rejects.toBeInstanceOf(BangladeshBankBlockedError);
 });
 
-test('rejects a partial capture so it cannot erase the other board from a snapshot', async () => {
+test('rejects a partial capture so it cannot erase the other board from saved data', async () => {
   await expect(fetchBangladeshBankJobs(async (url) =>
     new Response(url === BB_PAGES[0].url ? bb : rejected),
   )).rejects.toBeInstanceOf(BangladeshBankBlockedError);
+});
+
+test('missing date fields cannot replace a complete saved BB capture', async () => {
+  const missingDates = bscs.replace(/26\/10\/2026/g, 'unknown');
+  await expect(fetchBangladeshBankJobs(async (url) =>
+    new Response(url === BB_PAGES[0].url ? bb : missingDates),
+  )).rejects.toThrow('missing publish dates or close dates');
 });
 
 test('a changed page is a parser failure rather than a known network block', async () => {

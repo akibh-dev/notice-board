@@ -1,0 +1,297 @@
+{
+  "schemaVersion": 1,
+  "sourceId": "teletalk-alljobs",
+  "fetchedAt": "2026-10-26T10:29:59.601Z",
+  "notices": [
+    {
+      "title": "Office of the Superintendent of Police, Sherpur(SPOSHERPUR)",
+      "organization": "Office of the Superintendent of Police, Sherpur(SPOSHERPUR)",
+      "url": "https://spsherpur.teletalk.com.bd/",
+      "publishedAt": "2026-10-27",
+      "deadline": "2026-11-26",
+      "vacancies": 6,
+      "positions": 3,
+      "category": "job"
+    },
+    {
+      "title": "Deputy Commissioner Office, Noakhali (DCNOAKHALI)",
+      "organization": "Deputy Commissioner Office, Noakhali (DCNOAKHALI)",
+      "url": "http://dcnoakhali.teletalk.com.bd/",
+      "publishedAt": "2026-10-26",
+      "deadline": "2026-11-26",
+      "vacancies": 22,
+      "positions": 4,
+      "category": "job"
+    },
+    {
+      "title": "Taxes Zone-9, Dhaka (TAX9)",
+      "organization": "Taxes Zone-9, Dhaka (TAX9)",
+      "url": "https://tax9.teletalk.com.bd/",
+      "publishedAt": "2026-10-25",
+      "deadline": "2026-11-14",
+      "vacancies": 38,
+      "positions": 9,
+      "category": "job"
+    },
+    {
+      "title": "Office of The Commissioner of Taxes Taxes Zone-6, Dhaka(TAX6)",
+      "organization": "Office of The Commissioner of Taxes Taxes Zone-6, Dhaka(TAX6)",
+      "url": "https://tax6.teletalk.com.bd/",
+      "publishedAt": "2026-10-25",
+      "deadline": "2026-11-14",
+      "vacancies": 41,
+      "positions": 7,
+      "category": "job"
+    },
+    {
+      "title": "Bangladesh Oil, Gas & Mineral Corporation (Petrobangla) BOGMC",
+      "organization": "Bangladesh Oil, Gas & Mineral Corporation (Petrobangla) BOGMC",
+      "url": "http://bogmc.teletalk.com.bd/",
+      "publishedAt": "2026-10-18",
+      "deadline": "2026-11-17",
+      "vacancies": 753,
+      "positions": 36,
+      "category": "job"
+    },
+    {
+      "title": "Office of the Superintendent of Police, Dinajpur(POLICEDINAJ)",
+      "organization": "Office of the Superintendent of Police, Dinajpur(POLICEDINAJ)",
+      "url": "https://spdinajpur.teletalk.com.bd/",
+      "publishedAt": "2026-10-18",
+      "deadline": "2026-11-17",
+      "vacancies": 1,
+      "positions": 1,
+      "category": "job"
+    },
+    {
+      "title": "DC Office Bogura (DCBOGURA)",
+      "organization": "DC Office Bogura (DCBOGURA)",
+      "url": "http://dcbogura.teletalk.com.bd/",
+      "publishedAt": "2026-10-18",
+      "deadline": "2026-11-07",
+      "vacancies": 2,
+      "positions": 2,
+      "category": "job"
+    },
+    {
+      "title": "DC Office Patuakhali (DCPATUAKHALI)",
+      "organization": "DC Office Patuakhali (DCPATUAKHALI)",
+      "url": "https://dcpatuakhali.teletalk.com.bd/",
+      "publishedAt": "2026-10-18",
+      "deadline": "2026-11-17",
+      "vacancies": 9,
+      "positions": 2,
+      "category": "job"
+    },
+    {
+      "title": "Sherpur District (DCSHERPUR)",
+      "organization": "Sherpur District (DCSHERPUR)",
+      "url": "http://dcsherpur.teletalk.com.bd/",
+      "publishedAt": "2026-10-15",
+      "deadline": "2026-11-04",
+      "vacancies": 16,
+      "positions": 6,
+      "category": "job"
+    },
+    {
+      "title": "Withholding Tax Management Unit, Dhaka(WTMU)",
+      "organization": "Withholding Tax Management Unit, Dhaka(WTMU)",
+      "url": "https://wtmu.teletalk.com.bd/wtmu_2026/",
+      "publishedAt": "2026-10-15",
+      "deadline": "2026-11-04",
+      "vacancies": 13,
+      "positions": 4,
+      "category": "job"
+    },
+    {
+      "title": "Housing & Building Research Institute(HBRI)",
+      "organization": "Housing & Building Research Institute(HBRI)",
+      "url": "http://hbri.teletalk.com.bd/",
+      "publishedAt": "2026-10-14",
+      "deadline": "2026-11-15",
+      "vacancies": 17,
+      "positions": 7,
+      "category": "job"
+    },
+    {
+      "title": "Taxes Zone-3, Chattogram(TZ3CTG)",
+      "organization": "Taxes Zone-3, Chattogram(TZ3CTG)",
+      "url": "https://tz3ctg.teletalk.com.bd/",
+      "publishedAt": "2026-10-14",
+      "deadline": "2026-11-05",
+      "vacancies": 33,
+      "positions": 5,
+      "category": "job"
+    },
+    {
+      "title": "Taxes Zone-21, Dhaka(TAX21)",
+      "organization": "Taxes Zone-21, Dhaka(TAX21)",
+      "url": "https://tax21.teletalk.com.bd/tax21_2026/",
+      "publishedAt": "2026-10-14",
+      "deadline": "2026-11-03",
+      "vacancies": 65,
+      "positions": 6,
+      "category": "job"
+    },
+    {
+      "title": "Bangladesh Chemical Industries Corporation (BCIC)",
+      "organization": "Bangladesh Chemical Industries Corporation (BCIC)",
+      "url": "http://bcic.teletalk.com.bd/",
+      "publishedAt": "2026-10-14",
+      "deadline": "2026-11-12",
+      "vacancies": 390,
+      "positions": 19,
+      "category": "job"
+    },
+    {
+      "title": "DC Office Netrokona (DCNETROKONA)",
+      "organization": "DC Office Netrokona (DCNETROKONA)",
+      "url": "http://dcnetrokona.teletalk.com.bd/",
+      "publishedAt": "2026-10-14",
+      "deadline": "2026-11-12",
+      "vacancies": 86,
+      "positions": 1,
+      "category": "job"
+    },
+    {
+      "title": "TAXESZONE CUMILLA (TZC)",
+      "organization": "TAXESZONE CUMILLA (TZC)",
+      "url": "https://tzc.teletalk.com.bd/",
+      "publishedAt": "2026-10-13",
+      "deadline": "2026-11-05",
+      "vacancies": 41,
+      "positions": 7,
+      "category": "job"
+    },
+    {
+      "title": "Office of Tax Commissioner Taxes Zone 13, Dhaka(TAX13)",
+      "organization": "Office of Tax Commissioner Taxes Zone 13, Dhaka(TAX13)",
+      "url": "https://tax13.teletalk.com.bd/",
+      "publishedAt": "2026-10-13",
+      "deadline": "2026-10-28",
+      "vacancies": 47,
+      "positions": 7,
+      "category": "job"
+    },
+    {
+      "title": "Office of The Commissioner of Taxes Taxes Zone-3, Dhaka(TAX3)",
+      "organization": "Office of The Commissioner of Taxes Taxes Zone-3, Dhaka(TAX3)",
+      "url": "https://tax3.teletalk.com.bd/",
+      "publishedAt": "2026-10-12",
+      "deadline": "2026-11-01",
+      "vacancies": 47,
+      "positions": 7,
+      "category": "job"
+    },
+    {
+      "title": "Bangladesh Police, CID",
+      "organization": "Bangladesh Police, CID",
+      "url": "http://cid.teletalk.com.bd/",
+      "publishedAt": "2026-10-11",
+      "deadline": "2026-11-08",
+      "vacancies": 18,
+      "positions": 3,
+      "category": "job"
+    },
+    {
+      "title": "Taxes Zone-22, Dhaka(TAX22)",
+      "organization": "Taxes Zone-22, Dhaka(TAX22)",
+      "url": "https://tax22.teletalk.com.bd/tax22_2026/",
+      "publishedAt": "2026-10-11",
+      "deadline": "2026-10-31",
+      "vacancies": 69,
+      "positions": 7,
+      "category": "job"
+    },
+    {
+      "title": "Office of the Commissioner of Taxes Taxes Zone- Rangpur(TAXRAN)",
+      "organization": "Office of the Commissioner of Taxes Taxes Zone- Rangpur(TAXRAN)",
+      "url": "https://taxran.teletalk.com.bd/",
+      "publishedAt": "2026-10-11",
+      "deadline": "2026-10-28",
+      "vacancies": 36,
+      "positions": 5,
+      "category": "job"
+    },
+    {
+      "title": "EASTERN LUBRICANTS BLENDERS LTD ( ELBL )",
+      "organization": "EASTERN LUBRICANTS BLENDERS LTD ( ELBL )",
+      "url": "http://elbl.teletalk.com.bd/",
+      "publishedAt": "2026-10-07",
+      "deadline": "2026-11-06",
+      "vacancies": 6,
+      "positions": 6,
+      "category": "job"
+    },
+    {
+      "title": "Directorate of Sports",
+      "organization": "Directorate of Sports",
+      "url": "https://ds.teletalk.com.bd/",
+      "publishedAt": "2026-10-01",
+      "deadline": "2026-10-30",
+      "vacancies": 43,
+      "positions": 6,
+      "category": "job"
+    },
+    {
+      "title": "DC Office Kurigram (DCKURIGRAM)",
+      "organization": "DC Office Kurigram (DCKURIGRAM)",
+      "url": "http://dckurigram.teletalk.com.bd/",
+      "publishedAt": "2026-09-30",
+      "deadline": "2026-10-29",
+      "vacancies": 13,
+      "positions": 2,
+      "category": "job"
+    },
+    {
+      "title": "Civil Surgeon Office, Narsingdi(CSNARSINGDI)",
+      "organization": "Civil Surgeon Office, Narsingdi(CSNARSINGDI)",
+      "url": "http://csnarsingdi.teletalk.com.bd/",
+      "publishedAt": "2026-09-30",
+      "deadline": "2026-10-30",
+      "vacancies": 119,
+      "positions": 8,
+      "category": "job"
+    },
+    {
+      "title": "Bangladesh Parjatan Corporation(PARJATAN)",
+      "organization": "Bangladesh Parjatan Corporation(PARJATAN)",
+      "url": "https://parjatan.teletalk.com.bd/",
+      "publishedAt": "2026-09-28",
+      "deadline": "2026-10-27",
+      "vacancies": 5,
+      "positions": 5,
+      "category": "job"
+    },
+    {
+      "title": "Ministry of Shipping (MOS)",
+      "organization": "Ministry of Shipping (MOS)",
+      "url": "https://mos.teletalk.com.bd/",
+      "publishedAt": "2026-09-28",
+      "deadline": "2026-10-27",
+      "vacancies": 35,
+      "positions": 3,
+      "category": "job"
+    },
+    {
+      "title": "DC Office Nilphamari (DCNILPHAMARI)",
+      "organization": "DC Office Nilphamari (DCNILPHAMARI)",
+      "url": "http://dcnil.teletalk.com.bd/",
+      "publishedAt": "2026-09-27",
+      "deadline": "2026-10-26",
+      "vacancies": 12,
+      "positions": 3,
+      "category": "job"
+    },
+    {
+      "title": "Civil Surgeon Office Rajshahi(CSRAJSHAHI)",
+      "organization": "Civil Surgeon Office Rajshahi(CSRAJSHAHI)",
+      "url": "http://csrajshahi.teletalk.com.bd/",
+      "publishedAt": "2025-11-24",
+      "deadline": "2026-12-14",
+      "vacancies": 1,
+      "positions": 1,
+      "category": "job"
+    }
+  ]
+}

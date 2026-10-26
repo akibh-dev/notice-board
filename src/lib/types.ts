@@ -27,13 +27,14 @@ export interface SourceMeta {
 }
 
 export interface Source extends SourceMeta {
-  /** Return all currently-listed notices. Throw on failure; the runner handles fallback. */
+  /** Used only by local refresh commands. Deployments read saved files. */
   fetch(ctx: FetchContext): Promise<Omit<Notice, 'id' | 'sourceId'>[]>;
-  /** Last successful capture from a network that can reach this source. */
-  snapshot?: SourceSnapshot;
 }
 
-export interface SourceSnapshot {
+/** Versioned, committed data/sources/<sourceId>.json file. */
+export interface SavedSourceData {
+  schemaVersion: 1;
+  sourceId: string;
   fetchedAt: string;
   notices: Omit<Notice, 'id' | 'sourceId'>[];
 }
@@ -46,7 +47,7 @@ export interface FetchContext {
 export interface SourceStatus {
   id: string;
   ok: boolean;
-  /** true when notices came from an earlier deploy or a saved source snapshot */
+  /** Whether an attempted refresh failed; normal saved-data builds are healthy. */
   stale: boolean;
   count: number;
   error?: string;
@@ -54,6 +55,7 @@ export interface SourceStatus {
 }
 
 export interface Dataset {
+  /** Most recent source capture, preserved across builds until data changes. */
   generatedAt: string;
   sources: SourceStatus[];
   notices: Notice[];
