@@ -68,8 +68,6 @@ function categoryFor(title: string, circularFor = ''): Category {
   return 'job';
 }
 
-const genericLinkText = /^\[?\s*(home|about|contact|login|log ?in|register|apply online|apply now|details|view|download|বাংলা|english)\s*\]?$/i;
-
 function cleanTitle(value: string): string {
   return value.replace(/\s+/g, ' ').replace(/\s*[|–—-]\s*$/, '').trim();
 }
@@ -84,20 +82,6 @@ function resolveUrl(href: string, base: string): string | undefined {
   }
 }
 
-function rowTitle(cells: string[], linkText: string): string {
-  if (linkText && !genericLinkText.test(linkText)) return linkText;
-  const candidates = cells
-    .map((cell) => cell.replace(/\s+/g, ' ').trim())
-    .filter((cell) => cell.length >= 8)
-    .filter((cell) => !genericLinkText.test(cell))
-    .filter((cell) => !findDate(cell))
-    .filter((cell) => !/^\d+$/.test(cell))
-    .filter((cell) => !/^(job\s*id|serial|sl\.?\s*no\.?)\s*[:#-]?\s*\d+$/i.test(cell));
-  // The notice title is usually the longest non-date cell in the row; the
-  // other cells tend to be a serial, job ID, date, or download action.
-  return candidates.sort((a, b) => b.length - a.length)[0] ?? '';
-}
-
 function columnIndex(headers: string[], pattern: RegExp, fallback: number): number {
   const index = headers.findIndex((header) => pattern.test(header));
   return index >= 0 ? index : fallback;
@@ -106,76 +90,74 @@ function columnIndex(headers: string[], pattern: RegExp, fallback: number): numb
 function parsePage(html: string, page: (typeof BB_PAGES)[number]): Omit<Notice, 'id' | 'sourceId'>[] {
   const $ = cheerio.load(html);
   const found = new Map<string, Omit<Notice, 'id' | 'sourceId'>>();
+  let matchingTables = 0;
+  const observedHeaders: string[][] = [];
 
-  // The two career pages link their actual circulars as PDFs in /career/.
-  // Restrict to those links so footer/navigation links can never become jobs.
-  const links = $('a[href]').filter((_, anchor) => {
-    const href = $(anchor).attr('href') ?? '';
-    const url = resolveUrl(href, page.url);
-    return !!url && new URL(url).pathname.startsWith('/career/') && /\.pdf$/i.test(new URL(url).pathname);
-  });
-  const add = (
-    anchor: { attr(name: string): string | undefined },
-    text: string,
-    rowText: string,
-    circularFor: string,
-    publishedAt?: string,
-    deadline?: string,
-  ) => {
-    const title = cleanTitle(text);
-    const href = anchor.attr('href');
-    const url = href ? resolveUrl(href, page.url) : undefined;
-    if (!title || title.length < 5 || genericLinkText.test(title) || !url || href?.startsWith('#')) return;
-    if (url === page.url || url === 'https://erecruitment.bb.org.bd/') return;
-    if (/javascript:|mailto:/i.test(href ?? '')) return;
-    const parsedUrl = new URL(url);
-    if (!parsedUrl.pathname.startsWith('/career/') || !/\.pdf$/i.test(parsedUrl.pathname)) return;
+  // Use the table's semantic columns instead of guessing from arbitrary page
+  // links. This excludes navigation/footer links and works if the download
+  // endpoint changes its URL format (or adds query parameters).
+  $('table').each((_, table) => {
+    const tableRows = $(table).find('tr').toArray();
+    const headerRowIndex = tableRows.findIndex((tr) => {
+      const values = $(tr).children('th, td').map((___, cell) =>
+        $(cell).text().replace(/\s+/g, ' ').trim(),
+      ).get();
+      if (values.length > 1 && observedHeaders.length < 4) observedHeaders.push(values);
+      const joined = values.join(' ');
+      return /job\s*id/i.test(joined) && /circular\s*title/i.test(joined) && /publish\s*date/i.test(joined);
+    });
+    if (headerRowIndex < 0) return;
+    const headers = $(tableRows[headerRowIndex]).children('th, td').map((__, cell) =>
+      $(cell).text().replace(/\s+/g, ' ').trim(),
+    ).get();
+    matchingTables++;
 
-    // The table/list usually labels the publication date alongside its link.
-    const category = categoryFor(title, circularFor);
-    const notice = {
-      title,
-      organization: page.name === 'Bangladesh Bank' ? 'Bangladesh Bank' : undefined,
-      url,
-      publishedAt: publishedAt ?? findDate(rowText),
-      deadline,
-      category,
-    };
-    // Keep the most informative duplicate if a responsive/mobile template
-    // repeats the same notice in a second table or list.
-    const key = `${url}|${title}`;
-    const previous = found.get(key);
-    if (!previous || (!previous.publishedAt && notice.publishedAt)) found.set(key, notice);
-  };
-
-  links.each((_, anchor) => {
-    const link = $(anchor);
-    const row = link.closest('tr, li, article, .notice, .news-item');
-    const context = row.length ? row : link.parent();
-    const rowText = context.text().replace(/\s+/g, ' ').trim();
-    const linkText = link.text().replace(/\s+/g, ' ').trim() || link.attr('title') || '';
-    const cells = row.children('td').map((__, cell) => $(cell).text().replace(/\s+/g, ' ').trim()).get();
-    const headerRow = row.closest('table').find('tr').filter((__, tr) => {
-      const values = $(tr).find('th, td').map((___, cell) => $(cell).text().replace(/\s+/g, ' ').trim()).get();
-      return /job\s*id/i.test(values.join(' ')) && /circular\s*title/i.test(values.join(' '));
-    }).first();
-    const headers = headerRow.find('th, td').map((__, cell) => $(cell).text().replace(/\s+/g, ' ').trim()).get();
     const titleIndex = columnIndex(headers, /circular\s*title/i, 2);
     const typeIndex = columnIndex(headers, /circular\s*for/i, 1);
     const publishIndex = columnIndex(headers, /publish\s*date/i, 4);
     const closeIndex = columnIndex(headers, /close\s*date|deadline/i, 5);
-    const titleFromColumn = cells[titleIndex] ?? '';
-    const title = titleFromColumn || rowTitle(cells, linkText);
-    const circularFor = cells[typeIndex] ?? '';
-    add(
-      link,
-      title,
-      rowText,
-      circularFor,
-      findDate(cells[publishIndex] ?? ''),
-      findDate(cells[closeIndex] ?? ''),
-    );
+
+    tableRows.forEach((tr, rowIndex) => {
+      if (rowIndex === headerRowIndex) return;
+      const row = $(tr);
+      const cells = row.children('td').map((___, cell) =>
+        $(cell).text().replace(/\s+/g, ' ').trim(),
+      ).get();
+      const title = cleanTitle(cells[titleIndex] ?? '');
+      if (title.length < 5 || /^(circular\s*title|no record found)$/i.test(title)) return;
+
+      const candidates = row.find('a[href]').toArray().map((anchor) => {
+        const link = $(anchor);
+        const href = link.attr('href') ?? '';
+        return {
+          href,
+          text: link.text().replace(/\s+/g, ' ').trim(),
+          url: resolveUrl(href, page.url),
+        };
+      }).filter((link) => link.url);
+      const download = candidates.find((link) => /\.pdf(?:$|[?#])/i.test(link.href))
+        ?? candidates.find((link) => /download/i.test(link.text) || /download/i.test(link.href))
+        ?? candidates[0];
+      if (!download?.url) return;
+
+      const circularFor = cells[typeIndex] ?? '';
+      const notice = {
+        title,
+        organization: page.name === 'Bangladesh Bank' ? 'Bangladesh Bank' : undefined,
+        url: download.url,
+        publishedAt: findDate(cells[publishIndex] ?? ''),
+        deadline: findDate(cells[closeIndex] ?? ''),
+        category: categoryFor(title, circularFor),
+      } satisfies Omit<Notice, 'id' | 'sourceId'>;
+      const key = `${notice.url}|${notice.title}`;
+      const previous = found.get(key);
+      if (!previous || (!previous.publishedAt && notice.publishedAt)) found.set(key, notice);
+    });
   });
+
+  if (matchingTables === 0) {
+    console.warn(`[bb-erecruitment] no circular table found on ${page.url}; observed headers: ${JSON.stringify(observedHeaders)}`);
+  }
 
   return [...found.values()];
 }
