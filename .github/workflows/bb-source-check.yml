@@ -1,0 +1,38 @@
+name: Bangladesh Bank source check
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/bb-erecruitment.ts'
+      - 'scripts/check-bb.ts'
+      - '.github/workflows/bb-source-check.yml'
+  push:
+    branches-ignore: [main]
+    paths:
+      - 'scripts/bb-erecruitment.ts'
+      - 'scripts/check-bb.ts'
+      - '.github/workflows/bb-source-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+      - run: bun install --frozen-lockfile
+      - name: Fetch and validate Bangladesh Bank notices
+        run: bunx tsx scripts/check-bb.ts
+      - name: Save source responses
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bb-source-responses
+          path: data/bb-debug/
+          retention-days: 3
