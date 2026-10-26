@@ -9,6 +9,7 @@
   "scripts": {
     "fetch": "tsx scripts/fetch.ts",
     "fetch:bb": "tsx scripts/bb-erecruitment.ts",
+    "fetch:bb:snapshot": "tsx scripts/bb-erecruitment.ts --snapshot",
     "fetch:fixtures": "tsx scripts/fetch.ts --fixtures",
     "dev": "astro dev",
     "build": "astro build",

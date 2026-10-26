@@ -7,6 +7,7 @@ import { createHash } from 'node:crypto';
 import { sources } from '../src/sources';
 import { fixtureNotices } from '../src/sources/fixtures';
 import type { Dataset, FetchContext, Notice, SourceStatus } from '../src/lib/types';
+import { selectSourceFallback } from '../src/lib/source-fallback';
 
 const useFixtures = process.argv.includes('--fixtures');
 const SITE_URL = process.env.SITE_URL;
@@ -61,11 +62,12 @@ async function main() {
         notices.push(...list);
         statuses.push({ id: s.id, ok: true, stale: false, count: list.length, fetchedAt: now });
       } else {
-        const old = previous?.notices.filter((n) => n.sourceId === s.id) ?? [];
+        const fallback = selectSourceFallback(s, previous);
+        const old = (fallback?.notices ?? []).map((n) => ({ ...n, sourceId: s.id, id: mkId(s.id, n) }));
         notices.push(...old);
-        const prevStatus = previous?.sources.find((x) => x.id === s.id);
-        statuses.push({ id: s.id, ok: false, stale: old.length > 0, count: old.length, error: String(r.reason?.message ?? r.reason), fetchedAt: prevStatus?.fetchedAt ?? now });
+        statuses.push({ id: s.id, ok: false, stale: old.length > 0, count: old.length, error: String(r.reason?.message ?? r.reason), fetchedAt: fallback?.fetchedAt ?? now });
         console.error(`[${s.id}] failed: ${r.reason?.message ?? r.reason}`);
+        if (old.length) console.log(`[${s.id}] retained ${old.length} notices captured at ${fallback?.fetchedAt}`);
       }
     });
   }

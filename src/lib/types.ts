@@ -29,6 +29,13 @@ export interface SourceMeta {
 export interface Source extends SourceMeta {
   /** Return all currently-listed notices. Throw on failure; the runner handles fallback. */
   fetch(ctx: FetchContext): Promise<Omit<Notice, 'id' | 'sourceId'>[]>;
+  /** Last successful capture from a network that can reach this source. */
+  snapshot?: SourceSnapshot;
+}
+
+export interface SourceSnapshot {
+  fetchedAt: string;
+  notices: Omit<Notice, 'id' | 'sourceId'>[];
 }
 
 export interface FetchContext {
@@ -39,7 +46,7 @@ export interface FetchContext {
 export interface SourceStatus {
   id: string;
   ok: boolean;
-  /** true when the notices shown came from the previous build */
+  /** true when notices came from an earlier deploy or a saved source snapshot */
   stale: boolean;
   count: number;
   error?: string;

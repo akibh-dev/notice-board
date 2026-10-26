@@ -7,7 +7,7 @@
  * `bunx tsx scripts/bb-erecruitment.ts` to write data/bb-erecruitment.json.
  */
 import * as cheerio from 'cheerio';
-import type { Category, Notice } from '../src/lib/types';
+import type { Category, Notice, SourceSnapshot } from '../src/lib/types';
 
 export const BB_PAGES = [
   {
@@ -21,6 +21,10 @@ export const BB_PAGES = [
 ] as const;
 
 type Get = (url: string, init?: RequestInit) => Promise<Response>;
+
+export class BangladeshBankBlockedError extends Error {
+  override name = 'BangladeshBankBlockedError';
+}
 
 function normalizeDigits(value: string): string {
   return value.replace(/[০-৯]/g, (digit) => String('০১২৩৪৫৬৭৮৯'.indexOf(digit)));
@@ -89,9 +93,12 @@ function columnIndex(headers: string[], pattern: RegExp, fallback: number): numb
 
 function parsePage(html: string, page: (typeof BB_PAGES)[number]): Omit<Notice, 'id' | 'sourceId'>[] {
   const $ = cheerio.load(html);
+  const pageTitle = $('title').first().text().trim();
+  if (/request rejected|access denied|forbidden/i.test(pageTitle)) {
+    throw new BangladeshBankBlockedError(`Bangladesh Bank blocked the request from this network (${pageTitle}); refresh its snapshot from a network that can reach the site`);
+  }
   const found = new Map<string, Omit<Notice, 'id' | 'sourceId'>>();
   let matchingTables = 0;
-  const observedHeaders: string[][] = [];
 
   // Use the table's semantic columns instead of guessing from arbitrary page
   // links. This excludes navigation/footer links and works if the download
@@ -102,7 +109,6 @@ function parsePage(html: string, page: (typeof BB_PAGES)[number]): Omit<Notice, 
       const values = $(tr).children('th, td').map((___, cell) =>
         $(cell).text().replace(/\s+/g, ' ').trim(),
       ).get();
-      if (values.length > 1 && observedHeaders.length < 4) observedHeaders.push(values);
       const joined = values.join(' ');
       return /job\s*id/i.test(joined) && /circular\s*title/i.test(joined) && /publish\s*date/i.test(joined);
     });
@@ -156,7 +162,7 @@ function parsePage(html: string, page: (typeof BB_PAGES)[number]): Omit<Notice, 
   });
 
   if (matchingTables === 0) {
-    console.warn(`[bb-erecruitment] no circular table found on ${page.url}; observed headers: ${JSON.stringify(observedHeaders)}`);
+    throw new Error(`no circular table in response from ${page.url} (title: ${pageTitle || '(none)'}, ${html.length} characters)`);
   }
 
   return [...found.values()];
@@ -180,15 +186,21 @@ export async function fetchBangladeshBankJobs(get: Get): Promise<Omit<Notice, 'i
 
   const unique = new Map<string, Omit<Notice, 'id' | 'sourceId'>>();
   const errors: string[] = [];
+  let blockedOnly = true;
   for (const result of results) {
     if (result.status === 'fulfilled') {
       for (const notice of result.value) unique.set(`${notice.url}|${notice.title}`, notice);
     } else {
       errors.push(String(result.reason?.message ?? result.reason));
+      if (!(result.reason instanceof BangladeshBankBlockedError)) blockedOnly = false;
     }
   }
-  if (unique.size === 0) throw new Error(errors.join('; ') || 'no Bangladesh Bank notices found');
-  if (errors.length) console.warn(`[bb-erecruitment] partial fetch: ${errors.join('; ')}`);
+  // Never replace a complete capture with a partial one when either board fails.
+  if (errors.length) {
+    if (blockedOnly) throw new BangladeshBankBlockedError(errors.join('; '));
+    throw new Error(errors.join('; '));
+  }
+  if (unique.size === 0) throw new Error('no Bangladesh Bank notices found');
   return [...unique.values()];
 }
 
@@ -215,7 +227,7 @@ async function defaultGet(url: string, init?: RequestInit): Promise<Response> {
 const invokedDirectly = /bb-erecruitment\.ts$/.test(process.argv[1] ?? '');
 if (invokedDirectly) {
   const notices = await fetchBangladeshBankJobs(defaultGet);
-  const { mkdir, writeFile } = await import('node:fs/promises');
+  const { mkdir, writeFile, rename } = await import('node:fs/promises');
   await mkdir('data', { recursive: true });
   await writeFile('data/bb-erecruitment.json', JSON.stringify({
     generatedAt: new Date().toISOString(),
@@ -223,4 +235,15 @@ if (invokedDirectly) {
     notices,
   }, null, 2));
   console.log(`wrote data/bb-erecruitment.json (${notices.length} notices)`);
+  if (process.argv.includes('--snapshot')) {
+    if (notices.some((notice) => !notice.publishedAt || !notice.deadline)) {
+      throw new Error('Refusing to replace snapshot: notices are missing publish dates or close dates');
+    }
+    const snapshot: SourceSnapshot = { fetchedAt: new Date().toISOString(), notices };
+    const file = 'src/sources/snapshots/bb-erecruitment.json';
+    await mkdir('src/sources/snapshots', { recursive: true });
+    await writeFile(`${file}.tmp`, JSON.stringify(snapshot, null, 2) + '\n');
+    await rename(`${file}.tmp`, file);
+    console.log(`updated ${file} (${notices.length} notices)`);
+  }
 }
