@@ -39,10 +39,23 @@ Sources that do not publish dates may omit them; BB refreshes require both dates
 
 ## Refresh before committing
 
+Run this single command to refresh every source and validate the app:
+
+```sh
+npm run prepare:commit
+```
+
+It fetches locally, runs type checks and tests, and builds from the saved data.
+It stops on failure and does not commit or push automatically. Review and commit
+the files in `data/sources/` after it succeeds.
+
+Individual commands are also available:
+
 ```sh
 npm run fetch:bb         # update only BB; fetch both official BB/BSCS pages
 npm run fetch:teletalk   # update only Teletalk, when needed
 npm run fetch            # update every source
+npm run build            # assemble saved data and build, without fetching
 git diff -- data/sources/
 git add data/sources/
 git commit -m "data: refresh saved notices"

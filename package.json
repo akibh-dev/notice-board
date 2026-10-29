@@ -11,6 +11,7 @@
     "fetch:bb": "tsx scripts/fetch.ts --source bb-erecruitment",
     "fetch:teletalk": "tsx scripts/fetch.ts --source teletalk-alljobs",
     "fetch:fixtures": "tsx scripts/fetch.ts --fixtures",
+    "prepare:commit": "npm run fetch && npm run check && npm test && npm run build",
     "data:build": "tsx scripts/build-data.ts",
     "dev": "npm run data:build && astro dev",
     "build": "npm run data:build && astro build",

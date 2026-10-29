@@ -1,8 +1,48 @@
 {
   "schemaVersion": 1,
   "sourceId": "teletalk-alljobs",
-  "fetchedAt": "2026-10-26T10:29:59.601Z",
+  "fetchedAt": "2026-10-29T10:59:33.353Z",
   "notices": [
+    {
+      "title": "Narail Distric (DCNARAIL)",
+      "organization": "Narail Distric (DCNARAIL)",
+      "url": "https://dcnarail.teletalk.com.bd/",
+      "publishedAt": "2026-11-01",
+      "deadline": "2026-11-22",
+      "vacancies": 16,
+      "positions": 7,
+      "category": "job"
+    },
+    {
+      "title": "Department of National Savings(NSD)",
+      "organization": "Department of National Savings(NSD)",
+      "url": "https://nsd.teletalk.com.bd/",
+      "publishedAt": "2026-10-29",
+      "deadline": "2026-11-26",
+      "vacancies": 95,
+      "positions": 8,
+      "category": "job"
+    },
+    {
+      "title": "Taxes Zone-Narayanganj(TAXNAR)",
+      "organization": "Taxes Zone-Narayanganj(TAXNAR)",
+      "url": "https://taxnar.teletalk.com.bd/",
+      "publishedAt": "2026-10-28",
+      "deadline": "2026-11-17",
+      "vacancies": 45,
+      "positions": 6,
+      "category": "job"
+    },
+    {
+      "title": "DC Office Chuadanga (DCCHUADANGA)",
+      "organization": "DC Office Chuadanga (DCCHUADANGA)",
+      "url": "http://dcchuadanga.teletalk.com.bd/dcchuadanga202609/",
+      "publishedAt": "2026-10-28",
+      "deadline": "2026-11-21",
+      "vacancies": 27,
+      "positions": 7,
+      "category": "job"
+    },
     {
       "title": "Office of the Superintendent of Police, Sherpur(SPOSHERPUR)",
       "organization": "Office of the Superintendent of Police, Sherpur(SPOSHERPUR)",
@@ -14,16 +54,6 @@
       "category": "job"
     },
     {
-      "title": "Deputy Commissioner Office, Noakhali (DCNOAKHALI)",
-      "organization": "Deputy Commissioner Office, Noakhali (DCNOAKHALI)",
-      "url": "http://dcnoakhali.teletalk.com.bd/",
-      "publishedAt": "2026-10-26",
-      "deadline": "2026-11-26",
-      "vacancies": 22,
-      "positions": 4,
-      "category": "job"
-    },
-    {
       "title": "Taxes Zone-9, Dhaka (TAX9)",
       "organization": "Taxes Zone-9, Dhaka (TAX9)",
       "url": "https://tax9.teletalk.com.bd/",
@@ -31,6 +61,16 @@
       "deadline": "2026-11-14",
       "vacancies": 38,
       "positions": 9,
+      "category": "job"
+    },
+    {
+      "title": "Deputy Commissioner Office, Noakhali (DCNOAKHALI)",
+      "organization": "Deputy Commissioner Office, Noakhali (DCNOAKHALI)",
+      "url": "http://dcnoakhali.teletalk.com.bd/",
+      "publishedAt": "2026-10-26",
+      "deadline": "2026-11-26",
+      "vacancies": 22,
+      "positions": 4,
       "category": "job"
     },
     {
@@ -164,16 +204,6 @@
       "category": "job"
     },
     {
-      "title": "Office of Tax Commissioner Taxes Zone 13, Dhaka(TAX13)",
-      "organization": "Office of Tax Commissioner Taxes Zone 13, Dhaka(TAX13)",
-      "url": "https://tax13.teletalk.com.bd/",
-      "publishedAt": "2026-10-13",
-      "deadline": "2026-10-28",
-      "vacancies": 47,
-      "positions": 7,
-      "category": "job"
-    },
-    {
       "title": "Office of The Commissioner of Taxes Taxes Zone-3, Dhaka(TAX3)",
       "organization": "Office of The Commissioner of Taxes Taxes Zone-3, Dhaka(TAX3)",
       "url": "https://tax3.teletalk.com.bd/",
@@ -201,16 +231,6 @@
       "deadline": "2026-10-31",
       "vacancies": 69,
       "positions": 7,
-      "category": "job"
-    },
-    {
-      "title": "Office of the Commissioner of Taxes Taxes Zone- Rangpur(TAXRAN)",
-      "organization": "Office of the Commissioner of Taxes Taxes Zone- Rangpur(TAXRAN)",
-      "url": "https://taxran.teletalk.com.bd/",
-      "publishedAt": "2026-10-11",
-      "deadline": "2026-10-28",
-      "vacancies": 36,
-      "positions": 5,
       "category": "job"
     },
     {
@@ -251,36 +271,6 @@
       "deadline": "2026-10-30",
       "vacancies": 119,
       "positions": 8,
-      "category": "job"
-    },
-    {
-      "title": "Bangladesh Parjatan Corporation(PARJATAN)",
-      "organization": "Bangladesh Parjatan Corporation(PARJATAN)",
-      "url": "https://parjatan.teletalk.com.bd/",
-      "publishedAt": "2026-09-28",
-      "deadline": "2026-10-27",
-      "vacancies": 5,
-      "positions": 5,
-      "category": "job"
-    },
-    {
-      "title": "Ministry of Shipping (MOS)",
-      "organization": "Ministry of Shipping (MOS)",
-      "url": "https://mos.teletalk.com.bd/",
-      "publishedAt": "2026-09-28",
-      "deadline": "2026-10-27",
-      "vacancies": 35,
-      "positions": 3,
-      "category": "job"
-    },
-    {
-      "title": "DC Office Nilphamari (DCNILPHAMARI)",
-      "organization": "DC Office Nilphamari (DCNILPHAMARI)",
-      "url": "http://dcnil.teletalk.com.bd/",
-      "publishedAt": "2026-09-27",
-      "deadline": "2026-10-26",
-      "vacancies": 12,
-      "positions": 3,
       "category": "job"
     },
     {
