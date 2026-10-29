@@ -1,8 +1,16 @@
 {
   "schemaVersion": 1,
   "sourceId": "bb-erecruitment",
-  "fetchedAt": "2026-10-26T11:17:10.775Z",
+  "fetchedAt": "2026-10-29T10:59:32.455Z",
   "notices": [
+    {
+      "title": "Primarily selected candidates (2nd and 3rd Phase) for 10 category posts of SPCBL (Circular No :45/2024). (Job Id -280, 282, 289, 294, 295, 296, 299 & 300)",
+      "organization": "Bangladesh Bank",
+      "url": "https://erecruitment.bb.org.bd/career/20261029_bb_372_1793248807.pdf",
+      "publishedAt": "2026-10-25",
+      "deadline": "2026-11-30",
+      "category": "result"
+    },
     {
       "title": "Circular regarding schedule of Preliminary Test for the post of 'Assistant Manager (General)' of SPCBL (Job ID:303)",
       "organization": "Bangladesh Bank",
@@ -36,6 +44,34 @@
       "category": "exam"
     },
     {
+      "title": "Schedule of Viva Voce for the Post of Maintenance Engineer (Job ID-25111) of Anser VDP Union Bank .",
+      "url": "https://erecruitment.bb.org.bd/career/20261029_bscs_352_1793261834.pdf",
+      "publishedAt": "2026-10-29",
+      "deadline": "2026-11-07",
+      "category": "exam"
+    },
+    {
+      "title": "Schedule of Viva Voce for the Post of Principal Officer (PO-Doctor) (Job ID-25121) of Janata Bank PLC.",
+      "url": "https://erecruitment.bb.org.bd/career/20261029_bscs_353_1793270885.pdf",
+      "publishedAt": "2026-10-29",
+      "deadline": "2026-11-06",
+      "category": "exam"
+    },
+    {
+      "title": "Schedule of MCQ Test and Exam Content with Mark Distribution for the Post of Senior Officer (General) (Grade-9) (Job ID: 26101) of 09 Banks & 2 FIs",
+      "url": "https://erecruitment.bb.org.bd/career/20261027_bscs_348_1793084047.pdf",
+      "publishedAt": "2026-10-27",
+      "deadline": "2027-10-28",
+      "category": "exam"
+    },
+    {
+      "title": "Written Result and Schedule of Viva Voce for the post of Officer (Cash) (Job ID-25103) of 07 Banks",
+      "url": "https://erecruitment.bb.org.bd/career/20261027_bscs_350_1793099853.pdf",
+      "publishedAt": "2026-10-27",
+      "deadline": "2026-11-21",
+      "category": "result"
+    },
+    {
       "title": "Download Admit Card for the post of Officer (General) (Job ID-26102) of 07 Banks and 2 FIs",
       "url": "https://erecruitment.bb.org.bd/career/20261026_bscs_346_1793006823.pdf",
       "publishedAt": "2026-10-26",
@@ -48,13 +84,6 @@
       "publishedAt": "2026-10-26",
       "deadline": "2026-11-02",
       "category": "job"
-    },
-    {
-      "title": "Schedule of Viva Voce for the Post of Security officer (Job ID-25119) of Investment Corporation of Bangladesh",
-      "url": "https://erecruitment.bb.org.bd/career/20261018_bscs_1_1792321974.pdf",
-      "publishedAt": "2026-10-19",
-      "deadline": "2026-10-27",
-      "category": "exam"
     },
     {
       "title": "Schedule of MCQ and Written Test, Exam Content with Mark Distribution for the Post of Assistant programmer/SO (Assistant programmer) (Job ID: 25106) (Grade-9) of 5 Banks and 2 financial institutions.",
@@ -75,20 +104,6 @@
       "url": "https://erecruitment.bb.org.bd/career/20261019_bscs_344_1792400064.pdf",
       "publishedAt": "2026-10-19",
       "deadline": "2026-10-31",
-      "category": "admit-card"
-    },
-    {
-      "title": "Download Admit Card for the post of Sub-Assistant Engineer (Mechanical) (Job ID-25114) of Sonali Bank PLC",
-      "url": "https://erecruitment.bb.org.bd/career/20261018_bscs_1_1792316400.pdf",
-      "publishedAt": "2026-10-18",
-      "deadline": "2026-10-26",
-      "category": "admit-card"
-    },
-    {
-      "title": "Download Admit Card for the post of Officer (General) (Job ID-26102) of 07 Banks and 2 FIs",
-      "url": "https://erecruitment.bb.org.bd/career/20261008_bscs_334_1791453707.pdf",
-      "publishedAt": "2026-10-08",
-      "deadline": "2026-10-26",
       "category": "admit-card"
     },
     {
